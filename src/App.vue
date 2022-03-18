@@ -5,7 +5,7 @@ import HeaderMobile from '@/components/HeaderMobile.vue'
 </script>
 
 <template>
-<!-- Vanilla vue -->
+  <!-- Vanilla vue -->
   <!-- <header>
     <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
 
@@ -17,33 +17,33 @@ import HeaderMobile from '@/components/HeaderMobile.vue'
         <RouterLink to="/about">About</RouterLink>
       </nav>
     </div>
-  </header> -->
+  </header>-->
   <!-- Vanilla vue end -->
 
   <!-- Header & Header Mobile -->
   <!-- Mobile header -->
   <HeaderMobile />
 
-
   <!-- Page Route manager -->
   <RouterView />
 </template>
 
 <style>
-@import '@/assets/base.css';
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+@import "@/assets/base.css";
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap");
 
 /* Custom CSS */
 body {
   @apply bg-themeSecondary;
   @apply text-themePrimary;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
 }
 
-h1, h2, h3, h4 {
+h1,
+h2,
+h4 {
   @apply text-themeTertiary;
 }
-
 
 /* basic vite/vue css rules made when creating the app, commented out for reference purposes */
 /* #app {
