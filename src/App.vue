@@ -1,48 +1,51 @@
 <script setup>
-import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from '@/components/HelloWorld.vue'
-import HeaderMobile from '@/components/HeaderMobile.vue'
+import { RouterLink, RouterView } from "vue-router";
+import HelloWorld from "@/components/HelloWorld.vue";
+import Header from "@/components/Header.vue";
+import Footer from "./components/Footer.vue";
 </script>
 
 <template>
-  <!-- Vanilla vue -->
-  <!-- <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
+   <!-- Vanilla vue -->
+   <!-- <header>
+   <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
 
-    <div class="wrapper">
+   <div class="wrapper">
       <HelloWorld msg="hello Monica!" />
 
       <nav>
-        <RouterLink to="/" class="test">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
+         <RouterLink to="/" class="test">Home</RouterLink>
+         <RouterLink to="/about">About</RouterLink>
       </nav>
-    </div>
-  </header>-->
-  <!-- Vanilla vue end -->
+      </div>
+   </header>-->
+   <!-- Vanilla vue end -->
 
-  <!-- Header & Header Mobile -->
-  <!-- Mobile header -->
-  <HeaderMobile />
+   <!-- Header & Header Mobile -->
+   <!-- Mobile header -->
+   <Header />
 
-  <!-- Page Route manager -->
-  <RouterView />
+   <!-- Page Route manager -->
+   <RouterView />
+
+   <Footer />
 </template>
 
 <style>
 @import "@/assets/base.css";
-@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;600;700&display=swap");
 
 /* Custom CSS */
 body {
-  @apply bg-themeSecondary;
-  @apply text-themePrimary;
-  font-family: "Poppins", sans-serif;
+   @apply bg-themeSecondary;
+   @apply text-themePrimary;
+   font-family: "Poppins", sans-serif;
 }
 
 h1,
 h2,
 h4 {
-  @apply text-themeTertiary;
+   @apply text-themeTertiary;
 }
 
 /* basic vite/vue css rules made when creating the app, commented out for reference purposes */

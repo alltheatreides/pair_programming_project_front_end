@@ -9,6 +9,7 @@ module.exports = {
       themeSecondary: '#111637',
       themeTertiary: '#FCC93C',
       themeQuaternary: '#3FA7D8',
+      themeQuaternaryDarker: '#3fa7d866',
     },
     extend: {},
   },

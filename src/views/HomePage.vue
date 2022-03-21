@@ -1,11 +1,11 @@
 <script setup>
-import HeroSection from '@/components/HeroSection.vue'
-import MktSection from '../components/MktSection.vue';
-
+import HeroSection from "@/components/HeroSection.vue";
+import MktSection from "../components/MktSection.vue";
+import SectionTestimonies from "../components/SectionTestimonies.vue";
 </script>
 
 <template>
-   <main class="p-6 pt-14">
+   <main class="pt-24 md:pt-14">
       <!-- Hero section -->
       <HeroSection />
 
@@ -13,6 +13,7 @@ import MktSection from '../components/MktSection.vue';
       <MktSection />
 
       <!-- Testimonies section -->
+      <SectionTestimonies />
 
       <!-- Footer section -->
    </main>
