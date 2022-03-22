@@ -12,7 +12,7 @@ defineProps({
 </script>
 
 <template>
-   <div class="card flex justify-center content-center py-3 rounded-xl">
+   <div class="card flex justify-center content-center p-5 rounded-xl">
       <svg
          class="w-2/6"
          width="56"

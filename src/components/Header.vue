@@ -8,7 +8,7 @@
    >
       <div class="container mx-auto flex justify-between">
          <!-- Logo and Brand Name  -->
-         <div class="flex gap-2 items-center">
+         <router-link to="/" class="flex gap-2 items-center">
             <p class="uppercase font-bold text-2xl">Morphee</p>
             <svg
                width="55"
@@ -42,7 +42,7 @@
                   fill="#FCF9FC"
                />
             </svg>
-         </div>
+         </router-link>
 
          <!-- Navbar -->
          <nav class="hidden md:block">
@@ -51,7 +51,14 @@
                <li>Accueil</li>
                </a>-->
                <router-link to="/" class="font-semibold">Accueil</router-link>
-               <router-link to="/login" class="font-semibold">connection</router-link>
+               <!-- Rajouter une condition d'existence de cookie user avant d'afficher le lien ci dessous -->
+               <!-- <router-link to="/login" class="font-semibold"
+                  >Connexion</router-link
+               > -->
+               <!-- Rajouter une condition d'existence de cookie user avant d'afficher le lien ci dessous -->
+               <router-link to="/register" class="font-semibold"
+                  >Inscription</router-link
+               >
                <!-- <router-link to="">Déconnexion</router-link> -->
             </ul>
          </nav>
@@ -73,7 +80,9 @@
          </button>
       </div>
       <!-- Modal popup -->
-      <div class="absolute hidden inset-y-0 right-0 h-screen z-10 bg-themeSecondary pt-6 px-6">
+      <div
+         class="absolute hidden inset-y-0 right-0 h-screen z-10 bg-themeSecondary pt-6 px-6"
+      >
          <nav class>
             <ul class="flex flex-col gap-6">
                <li>Accueil</li>
@@ -84,12 +93,3 @@
       </div>
    </header>
 </template>
-
-<style scope>
-/* .bg-themeQuaternary-darker {
-   background-color: rgba(63, 167, 216, 0.4);
-} */
-.router-link-active {
-   @apply text-themeTertiary;
-}
-</style>
