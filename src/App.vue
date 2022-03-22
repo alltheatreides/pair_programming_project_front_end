@@ -6,8 +6,8 @@ import Footer from "./components/Footer.vue";
 </script>
 
 <template>
-   <!-- Vanilla vue -->
-   <!-- <header>
+  <!-- Vanilla vue -->
+  <!-- <header>
    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
 
    <div class="wrapper">
@@ -18,17 +18,17 @@ import Footer from "./components/Footer.vue";
          <RouterLink to="/about">About</RouterLink>
       </nav>
       </div>
-   </header>-->
-   <!-- Vanilla vue end -->
+  </header>-->
+  <!-- Vanilla vue end -->
 
-   <!-- Header & Header Mobile -->
-   <!-- Mobile header -->
-   <Header />
+  <!-- Header & Header Mobile -->
+  <!-- Mobile header -->
+  <Header />
 
-   <!-- Page Route manager -->
-   <RouterView />
+  <!-- Page Route manager -->
+  <RouterView />
 
-   <Footer />
+  <Footer />
 </template>
 
 <style>
@@ -37,15 +37,19 @@ import Footer from "./components/Footer.vue";
 
 /* Custom CSS */
 body {
-   @apply bg-themeSecondary;
-   @apply text-themePrimary;
-   font-family: "Poppins", sans-serif;
+  @apply bg-themeSecondary;
+  @apply text-themePrimary;
+  font-family: "Poppins", sans-serif;
 }
 
 h1,
 h2,
 h4 {
-   @apply text-themeTertiary;
+  @apply text-themeTertiary;
+}
+
+.router-link-active {
+  @apply text-themeTertiary;
 }
 
 /* basic vite/vue css rules made when creating the app, commented out for reference purposes */

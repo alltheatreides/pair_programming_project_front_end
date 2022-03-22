@@ -10,6 +10,7 @@ module.exports = {
       themeTertiary: '#FCC93C',
       themeQuaternary: '#3FA7D8',
       themeQuaternaryDarker: '#3fa7d866',
+      themeSecondaryDarker: '#3fa7d81a'
     },
     extend: {},
   },

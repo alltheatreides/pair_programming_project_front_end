@@ -49,10 +49,10 @@
             <ul class="flex gap-6 uppercase text-2xl">
                <!-- <a href="/">
                <li>Accueil</li>
-            </a> -->
+               </a>-->
                <router-link to="/" class="font-semibold">Accueil</router-link>
-               <li class="font-semibold">connection</li>
-               <!-- <li>Déconnexion</li> -->
+               <router-link to="/login" class="font-semibold">connection</router-link>
+               <!-- <router-link to="">Déconnexion</router-link> -->
             </ul>
          </nav>
 
@@ -73,9 +73,7 @@
          </button>
       </div>
       <!-- Modal popup -->
-      <div
-         class="absolute hidden inset-y-0 right-0 h-screen z-10 bg-themeSecondary pt-6 px-6"
-      >
+      <div class="absolute hidden inset-y-0 right-0 h-screen z-10 bg-themeSecondary pt-6 px-6">
          <nav class>
             <ul class="flex flex-col gap-6">
                <li>Accueil</li>

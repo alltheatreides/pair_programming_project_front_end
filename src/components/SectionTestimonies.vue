@@ -9,6 +9,7 @@ import TestimonyCard from "./small/TestimonyCard.vue";
    >
       <h2 class="text-3xl mb-12 font-bold">Témoignages</h2>
       <TestimonyCard
+         class="lg:mb-20"
          title="“Une super amélioration !”"
          description="Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolores voluptatibus soluta maxime molestiae earum perferendis quo nesciunt, at obcaecati dicta cumque nam "
          picture="/public/pictures/mpatterson.png"
