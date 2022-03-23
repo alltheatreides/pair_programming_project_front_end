@@ -6,45 +6,87 @@ import Button from "../components/small/Button.vue";
 <script>
 export default {
    data() {
-      return {};
+      return {
+         display: false,
+         displayMail: false,
+         displayPassword: false
+      };
    },
    methods: {
-      test() {
-         console.log(this.user_name_input);
-         console.log(this.user_email_input);
-         console.log(this.user_password_input);
-         const what = JSON.stringify({
-            user_name: this.user_name_input,
-            user_email: this.user_email_input,
-            user_password: this.user_password_input,
-         });
-         console.log(what);
+      // test() {
+      //    console.log(this.user_name_input);
+      //    console.log(this.user_email_input);
+      //    console.log(this.user_password_input);
+      //    const what = JSON.stringify({
+      //       user_name: this.user_name_input,
+      //       user_email: this.user_email_input,
+      //       user_password: this.user_password_input,
+      //    });
+      //    console.log(what);
+      // },
+
+
+      checkFormInputs() {
+         //regex pour verifier si c'est un mail.
+         let mailformat = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+
+         if (!isNaN(this.user_name_input) || this.user_name_input == undefined) {
+            // console.log(message);
+            // let message = "Le nom est faux";
+
+            this.display = true
+            return false
+
+            //Envoi message d'erreur.
+         } else if (!this.user_email_input.match(mailformat)) {
+            this.displayMail = true
+            return false
+
+         } else if (this.user_password_input <= 6) {
+            this.displayPassword = true
+            return false
+         }
+         else {
+
+            return true
+         }
+
+
       },
+
       async register() {
          const rest = "http://127.0.0.1:8000";
-         try {
-            const response = await fetch(`${rest}/api/register`, {
-               method: "POST",
-               headers: {
-                  "Content-Type": "application/json",
-               },
-               body: JSON.stringify({
-                  // user_name: "UserTest2",
-                  // user_email: "UserTest2",
-                  // user_password: "this.user_password_input",
-                  user_name: this.user_name_input,
-                  user_email: this.user_email_input,
-                  user_password: this.user_password_input,
-               }),
-            });
-            const data = await response.json();
-            console.log(data);
-         } catch (error) {
-            console.log(error);
+         // Si le contenu de formulaire est bon alors on rentre dans le try.
+         this.checkFormInputs();
+         if (this.checkFormInputs() == true) {
+            try {
+               const response = await fetch(`${rest}/api/register`, {
+                  method: "POST",
+                  headers: {
+                     "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({
+                     // user_name: "UserTest2",
+                     // user_email: "UserTest2",
+                     // user_password: "this.user_password_input",
+                     user_name: this.user_name_input,
+                     user_email: this.user_email_input,
+                     user_password: this.user_password_input,
+                  }),
+               });
+               const data = await response.json();
+               console.log(data);
+            } catch (error) {
+               console.log(error);
+            }
          }
-      },
-   },
-};
+
+      }
+
+   }
+}
+
+
 </script>
 
 <template>
@@ -62,6 +104,8 @@ export default {
                      (newValue) => (user_name_input = newValue)
                   "
                />
+               <p v-if="display">Le nom es faux!</p>
+
                <FormField
                   label="Email"
                   type="text"
@@ -71,6 +115,8 @@ export default {
                      (newValue) => (user_email_input = newValue)
                   "
                />
+               <p v-if="displayMail">Le mail es faux!</p>
+
                <FormField
                   label="Mot de passe"
                   type="password"
@@ -79,6 +125,9 @@ export default {
                      (newValue) => (user_password_input = newValue)
                   "
                />
+               <p
+                  v-if="displayPassword"
+               >Le mot de passe est trop court! Il doit faire 6 charactères minimum</p>
                <Button @click="register" text="S'inscrire">
                   <template #svg>
                      <svg
@@ -104,3 +153,8 @@ export default {
       </section>
    </main>
 </template>
+<style>
+.red {
+   color: red;
+}
+</style>
