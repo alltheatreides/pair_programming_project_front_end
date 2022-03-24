@@ -52,9 +52,9 @@
                </a>-->
                <router-link to="/" class="font-semibold">Accueil</router-link>
                <!-- Rajouter une condition d'existence de cookie user avant d'afficher le lien ci dessous -->
-               <!-- <router-link to="/login" class="font-semibold"
+               <router-link to="/login" class="font-semibold"
                   >Connexion</router-link
-               > -->
+               >
                <!-- Rajouter une condition d'existence de cookie user avant d'afficher le lien ci dessous -->
                <router-link to="/register" class="font-semibold"
                   >Inscription</router-link
