@@ -3,9 +3,42 @@ import Form from "../components/small/Form.vue";
 import FormField from "../components/small/FormField.vue";
 import Button from "../components/small/Button.vue";
 import router from "../router";
+
 </script>
 
 <script>
+// console.log("coucou");
+// let data = {
+//    message: "",
+//    user_info: ["UserTest,1,$2y$10$cR7tjNXARFas5/edmtwuW./kdf887g.AwuIlwyMZFfMd12Pd5UNOG"]
+// }
+
+// function getCookie(username) {
+//    let name = username + "=";
+//    let decodedCookie = decodeURIComponent(document.cookie);
+//    let ca = decodedCookie.split(';');
+//    for (let i = 0; i < ca.length; i++) {
+//       let c = ca[i];
+//       while (c.charAt(0) == ' ') {
+//          c = c.substring(1);
+//       }
+//       if (c.indexOf(name) == 0) {
+//          return c.substring(name.length, c.length);
+//       }
+//    }
+//    return "";
+// }
+// let test = (getCookie("username"));
+// // tableau qui contient les info de cookies cree. On peut l'utiliser comme ca:nameUserMorphee[1];
+// let nameUserMorphee = test.split(",");
+// console.log(nameUserMorphee[1]);
+// document.cookie = `username=${data['user_info'][0]}`;
+// let onaunecookie = decodeURIComponent(document.cookie("username"));
+// document.cookie.split(';');
+// decodeURIComponent(document.cookie)
+// console.log(onaunecookie);
+// splitString(  document.cookie.split(';');
+
 export default {
    data() {
       return {
@@ -49,7 +82,22 @@ export default {
 
          return noErrors;
       },
-
+      //function pour obtenir le cookie d'utilisateur qui est retourné de backoffice en forme de data[user_info]
+      getCookie(username) {
+         let name = username + "=";
+         let decodedCookie = decodeURIComponent(document.cookie);
+         let ca = decodedCookie.split(';');
+         for (let i = 0; i < ca.length; i++) {
+            let c = ca[i];
+            while (c.charAt(0) == ' ') {
+               c = c.substring(1);
+            }
+            if (c.indexOf(name) == 0) {
+               return c.substring(name.length, c.length);
+            }
+         }
+         return "";
+      },
       // REST call to login user
       async login() {
          const rest = "http://127.0.0.1:8000";
@@ -73,6 +121,11 @@ export default {
                this.backendResponse = data;
                router.push("/dashboard");
                console.log(data);
+               //On cree le cookie avec les donnes returnes de Bo.
+               document.cookie = `user_info=${data['user_info']}`;
+
+
+
             } catch (error) {
                console.log(error);
             }
@@ -87,11 +140,7 @@ export default {
       <section
          class="container mx-auto px-6 md:px-10 lg:px-0 flex flex-col items-center min-h-[90vh]"
       >
-         <Form
-            title="Connectez vous !"
-            buttonText="Se connecter"
-            buttonLink="#"
-         >
+         <Form title="Connectez vous !" buttonText="Se connecter" buttonLink="#">
             <template #field>
                <FormField
                   label="Email"
@@ -104,9 +153,7 @@ export default {
                <div
                   class="mb-10 text-base lg:text-lg needtodothisforsomereason"
                   v-if="displayErrorMail"
-               >
-                  Le mail donné n'est pas au bon format
-               </div>
+               >Le mail donné n'est pas au bon format</div>
                <FormField
                   label="Mot de passe"
                   type="password"
@@ -118,9 +165,7 @@ export default {
                <div
                   class="mb-10 text-base lg:text-lg needtodothisforsomereason"
                   v-if="displayErrorPassword"
-               >
-                  Le mot de passe est vide !
-               </div>
+               >Le mot de passe est vide !</div>
                <Button @click="login" text="Se connecter">
                   <template #svg>
                      <svg
@@ -147,9 +192,7 @@ export default {
          <div
             class="mt-6 bg-themeSecondaryDarker p-6 rounded-xl text-lg needtodothisforsomereason"
             v-if="restMessageReturn"
-         >
-            {{ backendResponse.message }}
-         </div>
+         >{{ backendResponse.message }}</div>
       </section>
    </main>
 </template>
