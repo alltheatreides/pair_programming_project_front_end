@@ -53,6 +53,10 @@ ul > .router-link-active {
    @apply text-themeTertiary;
 }
 
+/* p {
+   @apply text-red-600;
+} */
+
 /* basic vite/vue css rules made when creating the app, commented out for reference purposes */
 /* #app {
   max-width: 1280px;
