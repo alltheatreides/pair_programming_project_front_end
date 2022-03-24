@@ -7,7 +7,9 @@
     "preview": "vite preview --port 5050"
   },
   "dependencies": {
+    "chart.js": "^3.7.1",
     "vue": "^3.2.31",
+    "vue-chart-3": "^3.1.7",
     "vue-router": "^4.0.12"
   },
   "devDependencies": {

@@ -1,8 +1,31 @@
-<script setup></script>
+<script setup>
+import { BarChart } from "vue-chart-3";
+import { Chart, registerables } from "chart.js";
+
+Chart.register(...registerables);
+</script>
 <script>
 export default {
    data() {
-      return {};
+      return {
+         // dateLabels: Array,
+         dateLabels: [],
+         testData: {
+            labels: ["Paris", "Nîmes", "Toulon", "Perpignan", "Autre"],
+            datasets: [
+               {
+                  data: [30, 40, 60, 70, 5, 69, 69],
+                  backgroundColor: [
+                     "#77CEFF",
+                     "#0079AF",
+                     "#123E6B",
+                     "#97B0C4",
+                     "#A5C8ED",
+                  ],
+               },
+            ],
+         },
+      };
    },
    methods: {
       // Method that should be used as a High Order Component/Function (or just use the vue-cookie package lol)
@@ -44,6 +67,10 @@ export default {
             );
             const data = await response.json();
             console.log(data);
+            data.lastThirtyDaysStatistics.map((entry) => {
+               this.dateLabels.push(entry.date.date);
+            });
+            this.testData.labels = this.dateLabels;
          } catch (error) {
             console.log(error);
          }
@@ -58,9 +85,12 @@ export default {
 </script>
 
 <template>
-   <main class="pt-24 md:pt-14">
+   <main class="pt-24 md:pt-14 bg-themePrimary">
       <section
          class="container mx-auto px-6 md:px-10 lg:px-0 flex flex-col items-center min-h-[90vh]"
-      ></section>
+      >
+         <h1>Hello world</h1>
+         <BarChart :chartData="testData" />
+      </section>
    </main>
 </template>
