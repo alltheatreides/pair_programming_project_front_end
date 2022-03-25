@@ -8,22 +8,62 @@ Chart.register(...registerables);
 export default {
    data() {
       return {
-         // dateLabels: Array,
+         displayChart: false,
          dateLabels: [],
+         sleepHours: [],
          testData: {
-            labels: ["Paris", "Nîmes", "Toulon", "Perpignan", "Autre"],
+            // labels: ["Paris", "Nîmes", "Toulon", "Perpignan", "Autre"],
             datasets: [
                {
-                  data: [30, 40, 60, 70, 5, 69, 69],
-                  backgroundColor: [
-                     "#77CEFF",
-                     "#0079AF",
-                     "#123E6B",
-                     "#97B0C4",
-                     "#A5C8ED",
-                  ],
+                  // data: [30, 40, 60, 70, 5],
+                  backgroundColor: ["#3FA7D8", "#3fa7d866"],
+                  color: "#fff",
                },
             ],
+         },
+         options: {
+            responsive: true,
+            plugins: {
+               legend: {
+                  display: false,
+                  // labels: {
+                  //    color: "rgb(255, 99, 132)",
+                  // },
+               },
+               title: {
+                  display: true,
+                  text: "Heures de sommeil par jour",
+                  color: "#FCF9FC",
+                  font: {
+                     size: 36,
+                  },
+               },
+               tooltip: {
+                  callbacks: {
+                     label: function (context) {
+                        return `${context.parsed.y} heures`;
+                     },
+                  },
+               },
+            },
+            scales: {
+               y: {
+                  ticks: {
+                     color: "#FCF9FC",
+                  },
+                  grid: {
+                     color: "rgb(252,249,252, 0.1)",
+                  },
+               },
+               x: {
+                  ticks: {
+                     color: "#FCF9FC",
+                  },
+                  grid: {
+                     color: "rgb(252,249,252, 0.1)",
+                  },
+               },
+            },
          },
       };
    },
@@ -65,16 +105,35 @@ export default {
                   }),
                }
             );
+            // Object response with an array in it
             const data = await response.json();
             console.log(data);
+
+            // Looping over the data array to populate the ChartJS label array and data array
             data.lastThirtyDaysStatistics.map((entry) => {
-               this.dateLabels.push(entry.date.date);
+               // Converting the unix date timestamp to human readable dates
+               const date = new Date(entry.date * 1000);
+               this.dateLabels.push(date.toLocaleDateString());
+
+               // Converting unix hours timestamp to human readeable dates
+               const heureCoucher = new Date(entry.heure_couche * 1000);
+               const heureReveil = new Date(entry.heure_reveil * 1000);
+
+               // Calculating hour difference between coucher et réveil
+               let hours = Math.abs(heureReveil - heureCoucher) / 36e5;
+
+               // Populate internal array with calculated sleep hour
+               this.sleepHours.push(hours);
             });
-            this.testData.labels = this.dateLabels;
+
+            // WIP changing the label array with the recently populated label array
+            this.testData.datasets[0].data = this.sleepHours.reverse();
+            this.testData.labels = this.dateLabels.reverse();
+
+            this.displayChart = !this.displayChart;
          } catch (error) {
             console.log(error);
          }
-         // }
       },
    },
    // On component loaded (page)
@@ -85,12 +144,34 @@ export default {
 </script>
 
 <template>
-   <main class="pt-24 md:pt-14 bg-themePrimary">
+   <main class="pt-24 md:pt-14">
       <section
          class="container mx-auto px-6 md:px-10 lg:px-0 flex flex-col items-center min-h-[90vh]"
       >
-         <h1>Hello world</h1>
-         <BarChart :chartData="testData" />
+         <!-- Canvas CHART js -->
+         <div v-if="displayChart" class="w-3/6">
+            <BarChart :chartData="testData" :options="options" />
+         </div>
+         <!-- Loading icon inbetween rest call -->
+         <div v-else class="text-xl flex items-center">
+            <svg
+               role="status"
+               class="inline w-10 h-10 mr-4 text-gray-200 animate-spin"
+               viewBox="0 0 100 101"
+               fill="none"
+               xmlns="http://www.w3.org/2000/svg"
+            >
+               <path
+                  d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+                  fill="currentColor"
+               />
+               <path
+                  d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+                  fill="#1C64F2"
+               />
+            </svg>
+            Chargement...
+         </div>
       </section>
    </main>
 </template>
