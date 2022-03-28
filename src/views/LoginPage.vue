@@ -71,8 +71,8 @@ export default {
       async login() {
          const rest = "http://127.0.0.1:8000";
          // Checking on field inputs
-         console.log(this.checkLoginFormInputs());
-         console.log("you clicked on the button ahaha");
+         // console.log(this.checkLoginFormInputs());
+         // console.log("you clicked on the button ahaha");
          if (this.checkLoginFormInputs() === "true") {
             try {
                const response = await fetch(`${rest}/api/login`, {
@@ -91,14 +91,16 @@ export default {
                this.restMessageReturn = !this.restMessageReturn;
                this.backendResponse = data;
 
-               // Route to the dashboard page: as of writing does not properly refreshed the page (ie leaves the login template on screen)
-               router.push("/dashboard");
-
                // Gotta test somehow and it is annoying to comment and decomment atm
                console.log(data);
 
                // Create cookies from json server response
                document.cookie = `user_info=${data["user_info"]}`;
+
+               // Route to the dashboard page: as of writing does not properly refreshed the page (ie leaves the login template on screen)
+               router.push("/dashboard");
+
+               // Trigger refresh of header
             } catch (error) {
                console.log(error);
             }

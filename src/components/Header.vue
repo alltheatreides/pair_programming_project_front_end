@@ -2,13 +2,87 @@
 // functions
 </script>
 
+<script>
+import router from "../router";
+
+export default {
+   data() {
+      return {
+         loggedIn: false,
+         headerKey: 0,
+      };
+   },
+   methods: {
+      // Method that should be used as a High Order Component/Function (or just use the vue-cookie package lol)
+      getCookie(username) {
+         let name = username + "=";
+         let decodedCookie = decodeURIComponent(document.cookie);
+         let ca = decodedCookie.split(";");
+         for (let i = 0; i < ca.length; i++) {
+            let c = ca[i];
+            while (c.charAt(0) == " ") {
+               c = c.substring(1);
+            }
+            if (c.indexOf(name) == 0) {
+               return c.substring(name.length, c.length);
+            }
+         }
+         return "";
+      },
+
+      // Verify that user_info cookie exists, if yes change loggein status to true
+      checkLoggedIn() {
+         if (this.getCookie("user_info") !== "") {
+            if (!this.loggedIn) {
+               this.loggedIn = true;
+            }
+         }
+      },
+      // Remove cookies and trigger a heaer component rerender
+      disconnect() {
+         // if not on the main page, redirect to the main page
+         console.log("Beam me up scotty");
+         router.push("/");
+
+         // Remove the cookie
+         document.cookie =
+            "user_info=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+
+         // Updating the tracking logged in variable
+         this.loggedIn = false;
+
+         // Triggers a rerender of the header component so the navbar options are updated
+         this.forceRerender();
+      },
+      // Manages the rerender with template keys
+      forceRerender() {
+         this.headerKey += 1;
+      },
+   },
+
+   // On component mounted/change, make sure to check user logged in status to display proper navbar options
+   mounted() {
+      this.checkLoggedIn();
+   },
+   // On component mounted/change, make sure to check user logged in status to display proper navbar options
+   updated() {
+      this.checkLoggedIn();
+   },
+};
+</script>
+
 <template>
    <header
       class="bg-themeQuaternary md:bg-themeQuaternaryDarker flex z-20 items-center justify-between w-full px-4 md:px-10 lg:px-0 py-4 fixed md:relative"
+      :key="headerKey"
    >
       <div class="container mx-auto flex justify-between">
          <!-- Logo and Brand Name  -->
-         <router-link to="/" class="flex gap-2 items-center">
+         <router-link
+            to="/"
+            class="flex gap-2 items-center"
+            @click="forceRerender"
+         >
             <p class="uppercase font-bold text-2xl">Morphee</p>
             <svg
                width="55"
@@ -52,14 +126,22 @@
                </a>-->
                <router-link to="/" class="font-semibold">Accueil</router-link>
                <!-- Rajouter une condition d'existence de cookie user avant d'afficher le lien ci dessous -->
-               <router-link to="/login" class="font-semibold"
+               <router-link to="/login" v-if="!loggedIn" class="font-semibold"
                   >Connexion</router-link
                >
                <!-- Rajouter une condition d'existence de cookie user avant d'afficher le lien ci dessous -->
-               <router-link to="/register" class="font-semibold"
+               <router-link
+                  to="/register"
+                  v-if="!loggedIn"
+                  class="font-semibold"
                   >Inscription</router-link
                >
-               <!-- <router-link to="">Déconnexion</router-link> -->
+               <router-link to="/dashboard" v-if="loggedIn" class="uppercase">
+                  Dashboard
+               </router-link>
+               <button v-if="loggedIn" @click="disconnect" class="uppercase">
+                  Déconnexion
+               </button>
             </ul>
          </nav>
 
