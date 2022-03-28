@@ -1,17 +1,86 @@
 <script setup>
 import { BarChart } from "vue-chart-3";
 import { Chart, registerables } from "chart.js";
+import router from "../router";
+
+
 
 Chart.register(...registerables);
 </script>
 <script>
 export default {
+
+   beforeMount() {
+      if (this.getCookie("user_info") == "") {
+         return router.push('/404');
+      }
+   },
    data() {
       return {
+
          displayChart: false,
+         displayChartSeven: false,
+         displayEmpty: false,
          dateLabels: [],
          sleepHours: [],
          testData: {
+            // labels: ["Paris", "Nîmes", "Toulon", "Perpignan", "Autre"],
+            datasets: [
+               {
+                  // data: [30, 40, 60, 70, 5],
+                  backgroundColor: ["#3FA7D8", "#3fa7d866"],
+                  color: "#fff",
+               },
+            ],
+         },
+         options: {
+            responsive: true,
+            plugins: {
+               legend: {
+                  display: false,
+                  // labels: {
+                  //    color: "rgb(255, 99, 132)",
+                  // },
+               },
+               title: {
+                  display: true,
+                  text: "Heures de sommeil par jour",
+                  color: "#FCF9FC",
+                  font: {
+                     size: 36,
+                  },
+               },
+               tooltip: {
+                  callbacks: {
+                     label: function (context) {
+                        return `${context.parsed.y} heures`;
+                     },
+                  },
+               },
+            },
+            scales: {
+               y: {
+                  ticks: {
+                     color: "#FCF9FC",
+                  },
+                  grid: {
+                     color: "rgb(252,249,252, 0.1)",
+                  },
+               },
+               x: {
+                  ticks: {
+                     color: "#FCF9FC",
+                  },
+                  grid: {
+                     color: "rgb(252,249,252, 0.1)",
+                  },
+               },
+            },
+         },
+
+         dateLabelsSeven: [],
+         sleepHoursSeven: [],
+         testDataSeven: {
             // labels: ["Paris", "Nîmes", "Toulon", "Perpignan", "Autre"],
             datasets: [
                {
@@ -135,10 +204,69 @@ export default {
             console.log(error);
          }
       },
+      // REST call to get user info from the last 30 days
+      async userLatestStat7() {
+         // TODO need to put that rest adresse as an ENV global
+         const rest = "http://127.0.0.1:8000";
+         try {
+            // On recupere l'info a travers la funcion getCookie. // tableau qui contient les info de cookies cree. On peut l'utiliser comme ca:cookie_user_info [1];
+            let cookie_user_info = this.getCookie("user_info").split(",");
+
+            const response = await fetch(
+               `${rest}/api/statistics/${cookie_user_info[1]}/latest/7`,
+               {
+                  method: "POST",
+                  headers: {
+                     "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({
+                     user_id: parseInt(cookie_user_info[1]),
+                  }),
+               }
+            );
+            // Object response with an array in it
+            const data = await response.json();
+
+            console.log(data.lastSevenDaysStatistics);
+            if (data.lastSevenDaysStatistics == "") {
+               this.displayEmpty = !this.displayEmpty;
+
+            } else {
+
+               // Looping over the data array to populate the ChartJS label array and data array
+               data.lastSevenDaysStatistics.map((entry) => {
+                  // Converting the unix date timestamp to human readable dates
+                  const date = new Date(entry.date * 1000);
+                  this.dateLabelsSeven.push(date.toLocaleDateString());
+
+                  // Converting unix hours timestamp to human readeable dates
+                  const heureCoucher = new Date(entry.heure_couche * 1000);
+                  const heureReveil = new Date(entry.heure_reveil * 1000);
+
+                  // Calculating hour difference between coucher et réveil
+                  let hours = Math.abs(heureReveil - heureCoucher) / 36e5;
+                  console.log(hours)
+
+                  // Populate internal array with calculated sleep hour
+                  this.sleepHoursSeven.push(hours);
+               });
+
+               // WIP changing the label array with the recently populated label array
+               this.testDataSeven.datasets[0].data = this.sleepHoursSeven.reverse();
+
+               this.testDataSeven.labels = this.dateLabelsSeven.reverse();
+
+               this.displayChartSeven = !this.displayChartSeven;
+            }
+         } catch (error) {
+            console.log(error);
+         }
+      },
    },
    // On component loaded (page)
    mounted() {
       this.userLatestStat30();
+      this.userLatestStat7();
    },
 };
 </script>
@@ -171,6 +299,12 @@ export default {
                />
             </svg>
             Chargement...
+         </div>
+         <div v-if="displayChartSeven" class="w-3/6">
+            <BarChart :chartData="testDataSeven" :options="options" />
+         </div>
+         <div v-if="displayEmpty">
+            <p>Vous n'avez pas de donées pour le 7 derniers jours</p>
          </div>
       </section>
    </main>
