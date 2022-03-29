@@ -2,11 +2,15 @@
 import { BarChart } from "vue-chart-3";
 import { Chart, registerables } from "chart.js";
 import router from "../router";
+import FormStat from "../components/FormStat.vue";
+import FormField from "../components/small/FormField.vue";
+import Button from "../components/small/Button.vue";
 
 // Used to make the chart work
 Chart.register(...registerables);
 </script>
 <script>
+
 export default {
    // Check before mounting the page that an user cookie is present, if not redirect to the 404 page
    beforeMount() {
@@ -22,6 +26,10 @@ export default {
          displayChartSeven: false,
          // Variable to manage the display of the error message if there are no 7 days statistics
          displayEmpty: false,
+         // Variable to manage the display of the error message if there are no 30 days statistics
+         displayEmpty30: false,
+         displayLoading30: true,
+         displayLoading7: true,
 
          // Empty arrays to hold the first chart with 30 days statistics
          dateLabels: [],
@@ -140,6 +148,7 @@ export default {
                },
             },
          },
+         backendResponse: [],
       };
    },
    methods: {
@@ -162,6 +171,7 @@ export default {
 
       // REST call to get user info from the last 30 days
       async userLatestStat30() {
+
          // TODO need to put that rest adresse as an ENV global
          const rest = "http://127.0.0.1:8000";
          try {
@@ -182,42 +192,48 @@ export default {
             );
             // Object response with an array in it
             const data = await response.json();
-            // console.log(data);
 
-            // Looping over the data array to populate the ChartJS label array and data array
-            data.lastThirtyDaysStatistics.map((entry) => {
-               // Converting the unix date timestamp to human readable dates
-               const date = new Date(entry.date * 1000);
-               this.dateLabels.push(date.toLocaleDateString());
+            if (data.lastThirtyDaysStatistics.length <= 0) {
+               this.displayEmpty30 = !this.displayEmpty30;
+               // console.log(data);
+            } else {
 
-               // Converting unix hours timestamp to human readeable dates
-               const heureCoucher = new Date(entry.heure_couche * 1000);
-               const heureReveil = new Date(entry.heure_reveil * 1000);
+               // Looping over the data array to populate the ChartJS label array and data array
+               data.lastThirtyDaysStatistics.map((entry) => {
+                  // Converting the unix date timestamp to human readable dates
+                  const date = new Date(entry.date * 1000);
+                  this.dateLabels.push(date.toLocaleDateString());
 
-               // Calculating hour difference between coucher et réveil
-               let hours = Math.abs(heureReveil - heureCoucher) / 36e5;
+                  // Converting unix hours timestamp to human readeable dates
+                  const heureCoucher = new Date(entry.heure_couche * 1000);
+                  const heureReveil = new Date(entry.heure_reveil * 1000);
 
-               // Populate internal array with calculated sleep hour
-               this.sleepHours.push(hours);
-            });
+                  // Calculating hour difference between coucher et réveil
+                  let hours = Math.abs(heureReveil - heureCoucher) / 36e5;
 
-            // WIP changing the label array with the recently populated label array
-            this.chart30stat.datasets[0].data = this.sleepHours.reverse();
-            this.chart30stat.labels = this.dateLabels.reverse();
+                  // Populate internal array with calculated sleep hour
+                  this.sleepHours.push(hours);
+               });
 
-            this.displayChart = !this.displayChart;
+               // WIP changing the label array with the recently populated label array
+               this.chart30stat.datasets[0].data = this.sleepHours.reverse();
+               this.chart30stat.labels = this.dateLabels.reverse();
+               this.displayLoading30 = false;
+               this.displayChart = !this.displayChart;
+            }
          } catch (error) {
             console.log(error);
          }
       },
       // REST call to get user info from the last 7 days
       async userLatestStat7() {
+
          // TODO need to put that rest adresse as an ENV global
          const rest = "http://127.0.0.1:8000";
          try {
             // On recupere l'info a travers la funcion getCookie. // tableau qui contient les info de cookies cree. On peut l'utiliser comme ca:cookie_user_info [1];
             let cookie_user_info = this.getCookie("user_info").split(",");
-
+            console.log(cookie_user_info[1]);
             const response = await fetch(
                `${rest}/api/statistics/${cookie_user_info[1]}/latest/7`,
                {
@@ -227,13 +243,14 @@ export default {
                   },
                   body: JSON.stringify({
                      user_id: parseInt(cookie_user_info[1]),
+
                   }),
                }
             );
             // Object response with an array in it
             const data = await response.json();
 
-            console.log(data.lastSevenDaysStatistics);
+            console.log(data);
 
             // If response is empty, ie there are no statistics, handle the display of the error message that there are no stat
             if (data.lastSevenDaysStatistics.length <= 0) {
@@ -262,13 +279,59 @@ export default {
                   this.sleepHoursSeven.reverse();
 
                this.chart7stat.labels = this.dateLabelsSeven.reverse();
-
+               this.displayLoading7 = false;
                this.displayChartSeven = !this.displayChartSeven;
             }
          } catch (error) {
             console.log(error);
          }
       },
+      async addStat() {
+         try {
+            const rest = "http://127.0.0.1:8000";
+            let cookie_user_info = this.getCookie("user_info").split(",");
+            console.log(cookie_user_info[1]);
+            let user_id = cookie_user_info[1];
+            let user_date = new Date(this.user_date_input).getTime();
+
+            let user_heure_couche = new Date(this.user_date_input + this.user_heure_couche_input).getTime();
+            console.log(user_heure_couche);
+            let user_heure_reveil = new Date(this.user_heure_reveil_input).getTime();
+            // console.log(user_id, user_date, user_heure_couche, user_heure_reveil);
+
+            const response = await fetch(`${rest}/api/user/${cookie_user_info[1]}/create`, {
+               method: "POST",
+               headers: {
+                  "Content-Type": "application/json",
+               },
+
+               body: JSON.stringify({
+                  user_id: user_id, //A tester
+                  date: user_date,
+                  heure_couche: user_heure_couche,
+                  heure_reveil: user_heure_reveil
+
+
+               }),
+
+            });
+            const data = await response.json();
+            console.log(data);
+
+         } catch (error) {
+            console.log(error);
+         }
+         // let date_user = this.user_date_input
+         // const dateStr1 = date_user;
+
+         // const date1 = new Date(this.user_date_input).getTime();
+
+         // const timestamp = date1.getTime();
+         // console.log(date1);
+         // console.log(this.user_date_input);
+         // console.log(Date.parse(this.user_heure_couche_input) / 1000);
+         console.log(this.user_heure_reveil_input);
+      }
    },
    // On component loaded (page)
    mounted() {
@@ -277,6 +340,7 @@ export default {
       this.userLatestStat7();
    },
 };
+
 </script>
 
 <template>
@@ -289,7 +353,7 @@ export default {
             <BarChart :chartData="chart7stat" :options="chart7options" />
          </div>
          <!-- Loading icon inbetween rest call -->
-         <div v-else class="text-xl flex items-center mb-20">
+         <div v-if="displayLoading7" class="text-xl flex items-center mb-20">
             <svg
                role="status"
                class="inline w-10 h-10 mr-4 text-gray-200 animate-spin"
@@ -308,6 +372,7 @@ export default {
             </svg>
             Chargement...
          </div>
+         <!-- Display s'il n'y a pas données les 7 derniers jours -->
          <div v-if="displayEmpty" class="mb-20">
             <p>Vous n'avez pas de données pour les 7 derniers jours</p>
          </div>
@@ -317,7 +382,7 @@ export default {
             <BarChart :chartData="chart30stat" :options="chart30options" />
          </div>
          <!-- Loading icon inbetween rest call -->
-         <div v-else class="text-xl flex items-center mb-20">
+         <div v-if="displayLoading30" class="text-xl flex items-center mb-20">
             <svg
                role="status"
                class="inline w-10 h-10 mr-4 text-gray-200 animate-spin"
@@ -336,6 +401,37 @@ export default {
             </svg>
             Chargement...
          </div>
+         <!-- Display s'il n'y a pas données les 30 derniers jours -->
+         <div v-if="displayEmpty30" class="mb-20">
+            <p>Vous n'avez pas de données pour les 30 derniers jours</p>
+         </div>
+         <FormStat>
+            <template #field>
+               <FormField
+                  label="date"
+                  type="date"
+                  :modelValue="user_date_input"
+                  @update:modelValue="
+                     (newValue) => (user_date_input = newValue)
+                  "
+               />
+               <FormField
+                  label="heure couche"
+                  type="time"
+                  :modelValue="user_heure_couche_input"
+                  @update:modelValue="
+                  (newValue) => (user_heure_couche_input = newValue)"
+               />
+               <FormField
+                  label="heure reveil"
+                  type="time"
+                  :modelValue="user_heure_reveil_input"
+                  @update:modelValue="
+                  (newValue) => (user_heure_reveil_input = newValue)"
+               />
+               <Button text="Enregistrer" @click="addStat"></Button>
+            </template>
+         </FormStat>
       </section>
    </main>
 </template>
