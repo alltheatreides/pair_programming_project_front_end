@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : localhost
--- Généré le : lun. 28 mars 2022 à 13:57
+-- Généré le : mar. 29 mars 2022 à 13:39
 -- Version du serveur : 10.4.21-MariaDB
 -- Version de PHP : 8.1.1
 
@@ -67,7 +67,9 @@ INSERT INTO `statistics` (`id`, `user_id`, `date`, `heure_couche`, `heure_reveil
 (4, 1, '2022-03-01 00:00:00', '2022-03-15 14:03:13', '2022-03-15 20:03:13'),
 (5, 1, '2022-03-01 00:00:00', '2022-03-15 14:03:13', '2022-03-15 20:03:13'),
 (6, 1, '2022-03-28 12:18:02', '2022-03-27 19:18:02', '2022-03-28 06:00:02'),
-(7, 1, '2022-03-28 12:18:02', '2022-03-27 19:18:02', '2022-03-28 06:00:02');
+(7, 1, '2022-03-28 12:18:02', '2022-03-27 19:18:02', '2022-03-28 06:00:02'),
+(8, 1, '2022-03-01 00:00:00', '2022-03-15 14:03:13', '2022-03-15 20:03:13'),
+(9, 1, '2022-03-01 00:00:00', '2022-03-15 14:03:13', '2022-03-15 20:03:13');
 
 -- --------------------------------------------------------
 
@@ -126,7 +128,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT pour la table `statistics`
 --
 ALTER TABLE `statistics`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT pour la table `users`
