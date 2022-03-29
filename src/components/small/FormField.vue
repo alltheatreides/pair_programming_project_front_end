@@ -18,7 +18,7 @@ export default {
 </script>
 
 <template>
-   <div class="flex flex-col mb-10">
+   <div class="flex flex-col">
       <label class="mb-4 text-base lg:text-xl">{{ label }}</label>
       <input
          :type="type"

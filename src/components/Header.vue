@@ -10,6 +10,7 @@ export default {
       return {
          loggedIn: false,
          headerKey: 0,
+         toggleModal: false,
       };
    },
    methods: {
@@ -28,6 +29,11 @@ export default {
             }
          }
          return "";
+      },
+
+      // toggles the modal
+      openModalMenu() {
+         this.toggleModal = !this.toggleModal;
       },
 
       // Verify that user_info cookie exists, if yes change loggein status to true
@@ -121,9 +127,6 @@ export default {
          <!-- Navbar -->
          <nav class="hidden md:block">
             <ul class="flex gap-6 uppercase text-2xl">
-               <!-- <a href="/">
-               <li>Accueil</li>
-               </a>-->
                <router-link to="/" class="font-semibold">Accueil</router-link>
                <!-- Rajouter une condition d'existence de cookie user avant d'afficher le lien ci dessous -->
                <router-link to="/login" v-if="!loggedIn" class="font-semibold"
@@ -163,13 +166,45 @@ export default {
       </div>
       <!-- Modal popup -->
       <div
-         class="absolute hidden inset-y-0 right-0 h-screen z-10 bg-themeSecondary pt-6 px-6"
+         v-if="toggleModal"
+         class="absolute inset-y-0 right-0 h-screen z-10 bg-themeSecondary pt-6 px-6"
       >
          <nav class>
-            <ul class="flex flex-col gap-6">
-               <li>Accueil</li>
-               <li>Espace Personnel</li>
-               <li>Déconnexion</li>
+            <ul
+               class="flex flex-col gap-6 text-xl text-right uppercase font-bold"
+            >
+               <svg
+                  viewBox="0 0 334 334"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="w-[25px] self-end cursor-pointer"
+                  @click="openModalMenu"
+               >
+                  <path
+                     fill-rule="evenodd"
+                     clip-rule="evenodd"
+                     d="M206.184 166.576L324.954 47.806C335.884 36.876 335.907 19.122 324.973 8.18904C314.059 -2.72096 296.301 -2.73696 285.356 8.20857L166.576 126.979L47.806 8.20857C36.876 -2.72143 19.122 -2.74442 8.18904 8.18904C-2.72096 19.103 -2.73696 36.861 8.20857 47.806L126.979 166.576L8.20857 285.356C-2.72143 296.286 -2.74442 314.04 8.18904 324.973C19.103 335.883 36.861 335.899 47.806 324.953L166.576 206.184L285.356 324.953C296.286 335.883 314.04 335.906 324.973 324.973C335.883 314.059 335.899 296.301 324.954 285.356L206.184 166.576Z"
+                     fill="currentColor"
+                  />
+               </svg>
+               <router-link to="/" class="font-semibold">Accueil</router-link>
+               <!-- Rajouter une condition d'existence de cookie user avant d'afficher le lien ci dessous -->
+               <router-link to="/login" v-if="!loggedIn" class="font-semibold"
+                  >Connexion</router-link
+               >
+               <!-- Rajouter une condition d'existence de cookie user avant d'afficher le lien ci dessous -->
+               <router-link
+                  to="/register"
+                  v-if="!loggedIn"
+                  class="font-semibold"
+                  >Inscription</router-link
+               >
+               <router-link to="/dashboard" v-if="loggedIn" class="uppercase">
+                  Dashboard
+               </router-link>
+               <button v-if="loggedIn" @click="disconnect" class="uppercase">
+                  Déconnexion
+               </button>
             </ul>
          </nav>
       </div>

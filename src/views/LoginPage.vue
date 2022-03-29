@@ -94,8 +94,15 @@ export default {
                // Gotta test somehow and it is annoying to comment and decomment atm
                console.log(data);
 
+               // Handling cookie expiration date
+               const expireDate = new Date();
+               expireDate.setTime(
+                  expireDate.getTime() + 30 * 24 * 60 * 60 * 1000
+               );
+               let expires = "expires=" + expireDate.toUTCString();
+
                // Create cookies from json server response
-               document.cookie = `user_info=${data["user_info"]}`;
+               document.cookie = `user_info=${data["user_info"]}; ${expires}`;
 
                // Route to the dashboard page: as of writing does not properly refreshed the page (ie leaves the login template on screen)
                router.push("/dashboard");
@@ -128,6 +135,7 @@ export default {
                   @update:modelValue="
                      (newValue) => (user_email_input = newValue)
                   "
+                  class="mb-10"
                />
                <div
                   class="mb-10 text-base lg:text-lg needtodothisforsomereason"
@@ -142,6 +150,7 @@ export default {
                   @update:modelValue="
                      (newValue) => (user_password_input = newValue)
                   "
+                  class="mb-10"
                />
                <div
                   class="mb-10 text-base lg:text-lg needtodothisforsomereason"

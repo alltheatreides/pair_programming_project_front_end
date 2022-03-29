@@ -9,8 +9,8 @@ import Button from "../components/small/Button.vue";
 // Used to make the chart work
 Chart.register(...registerables);
 </script>
-<script>
 
+<script>
 export default {
    // Check before mounting the page that an user cookie is present, if not redirect to the 404 page
    beforeMount() {
@@ -21,6 +21,8 @@ export default {
    // Variables declaration
    data() {
       return {
+         // Managing page reload
+         mainKey: 0,
          // Variables to manage display of the charts
          displayChart: false,
          displayChartSeven: false,
@@ -30,6 +32,15 @@ export default {
          displayEmpty30: false,
          displayLoading30: true,
          displayLoading7: true,
+
+         // Manage Modal
+         toggleAddStatModal: false,
+
+         // input var definition
+         user_date_input: Date,
+         // user_heure_couche_input: String,
+         // user_heure_reveil_input: String,
+         user_date_2_input: Date,
 
          // Empty arrays to hold the first chart with 30 days statistics
          dateLabels: [],
@@ -171,7 +182,6 @@ export default {
 
       // REST call to get user info from the last 30 days
       async userLatestStat30() {
-
          // TODO need to put that rest adresse as an ENV global
          const rest = "http://127.0.0.1:8000";
          try {
@@ -194,10 +204,10 @@ export default {
             const data = await response.json();
 
             if (data.lastThirtyDaysStatistics.length <= 0) {
+               this.displayLoading7 = false;
                this.displayEmpty30 = !this.displayEmpty30;
                // console.log(data);
             } else {
-
                // Looping over the data array to populate the ChartJS label array and data array
                data.lastThirtyDaysStatistics.map((entry) => {
                   // Converting the unix date timestamp to human readable dates
@@ -219,7 +229,8 @@ export default {
                this.chart30stat.datasets[0].data = this.sleepHours.reverse();
                this.chart30stat.labels = this.dateLabels.reverse();
                this.displayLoading30 = false;
-               this.displayChart = !this.displayChart;
+               // this.displayChart = !this.displayChart;
+               this.displayChart = true;
             }
          } catch (error) {
             console.log(error);
@@ -227,13 +238,11 @@ export default {
       },
       // REST call to get user info from the last 7 days
       async userLatestStat7() {
-
          // TODO need to put that rest adresse as an ENV global
          const rest = "http://127.0.0.1:8000";
          try {
             // On recupere l'info a travers la funcion getCookie. // tableau qui contient les info de cookies cree. On peut l'utiliser comme ca:cookie_user_info [1];
             let cookie_user_info = this.getCookie("user_info").split(",");
-            console.log(cookie_user_info[1]);
             const response = await fetch(
                `${rest}/api/statistics/${cookie_user_info[1]}/latest/7`,
                {
@@ -243,7 +252,6 @@ export default {
                   },
                   body: JSON.stringify({
                      user_id: parseInt(cookie_user_info[1]),
-
                   }),
                }
             );
@@ -254,6 +262,7 @@ export default {
 
             // If response is empty, ie there are no statistics, handle the display of the error message that there are no stat
             if (data.lastSevenDaysStatistics.length <= 0) {
+               this.displayLoading7 = false;
                this.displayEmpty = !this.displayEmpty;
             } else {
                // Looping over the data array to populate the ChartJS label array and data array
@@ -267,8 +276,8 @@ export default {
                   const heureReveil = new Date(entry.heure_reveil * 1000);
 
                   // Calculating hour difference between coucher et réveil
-                  let hours = Math.abs(heureReveil - heureCoucher) / 36e5;
-                  console.log(hours);
+                  // let hours = Math.abs(heureReveil - heureCoucher) / 36e5;
+                  let hours = Math.abs(heureCoucher - heureReveil) / 36e5;
 
                   // Populate internal array with calculated sleep hour
                   this.sleepHoursSeven.push(hours);
@@ -280,59 +289,74 @@ export default {
 
                this.chart7stat.labels = this.dateLabelsSeven.reverse();
                this.displayLoading7 = false;
-               this.displayChartSeven = !this.displayChartSeven;
+               // this.displayChartSeven = !this.displayChartSeven;
+               this.displayChartSeven = true;
             }
          } catch (error) {
             console.log(error);
          }
       },
+
+      // REST call to CREATE sleep statistic entry
       async addStat() {
          try {
             const rest = "http://127.0.0.1:8000";
+            // Get cookie user id
             let cookie_user_info = this.getCookie("user_info").split(",");
-            console.log(cookie_user_info[1]);
             let user_id = cookie_user_info[1];
-            let user_date = new Date(this.user_date_input).getTime();
 
-            let user_heure_couche = new Date(this.user_date_input + this.user_heure_couche_input).getTime();
-            console.log(user_heure_couche);
-            let user_heure_reveil = new Date(this.user_heure_reveil_input).getTime();
-            // console.log(user_id, user_date, user_heure_couche, user_heure_reveil);
+            // Transform date & hour form input to Unix timestamp
+            // Date timestamp
+            let user_date = new Date(this.user_date_input).getTime() / 1000;
+            // Hours timestamps
+            let user_heure_couche =
+               new Date(
+                  this.user_date_input + "T" + this.user_heure_couche_input
+               ).getTime() / 1000;
+            let user_heure_reveil =
+               new Date(
+                  this.user_date_2_input + "T" + this.user_heure_reveil_input
+               ).getTime() / 1000;
 
-            const response = await fetch(`${rest}/api/user/${cookie_user_info[1]}/create`, {
-               method: "POST",
-               headers: {
-                  "Content-Type": "application/json",
-               },
+            console.log(user_heure_couche, user_heure_reveil);
 
-               body: JSON.stringify({
-                  user_id: user_id, //A tester
-                  date: user_date,
-                  heure_couche: user_heure_couche,
-                  heure_reveil: user_heure_reveil
+            const response = await fetch(
+               `${rest}/api/user/${cookie_user_info[1]}/create`,
+               {
+                  method: "POST",
+                  headers: {
+                     "Content-Type": "application/json",
+                  },
 
-
-               }),
-
-            });
+                  body: JSON.stringify({
+                     user_id: parseInt(user_id),
+                     date: user_date,
+                     heure_couche: user_heure_couche,
+                     heure_reveil: user_heure_reveil,
+                  }),
+               }
+            );
             const data = await response.json();
             console.log(data);
-
+            this.userLatestStat30();
+            this.userLatestStat7();
+            this.forceRerender();
          } catch (error) {
             console.log(error);
          }
-         // let date_user = this.user_date_input
-         // const dateStr1 = date_user;
+      },
 
-         // const date1 = new Date(this.user_date_input).getTime();
+      // Open the add stat modal
+      openAddStatModal() {
+         this.toggleAddStatModal = !this.toggleAddStatModal;
+      },
 
-         // const timestamp = date1.getTime();
-         // console.log(date1);
-         // console.log(this.user_date_input);
-         // console.log(Date.parse(this.user_heure_couche_input) / 1000);
-         console.log(this.user_heure_reveil_input);
-      }
+      // Manages the rerender with template keys
+      forceRerender() {
+         this.mainKey += 1;
+      },
    },
+
    // On component loaded (page)
    mounted() {
       // REST Async call to get user statistics
@@ -340,17 +364,30 @@ export default {
       this.userLatestStat7();
    },
 };
-
 </script>
 
 <template>
-   <main class="pt-24 md:pt-14">
+   <main class="pt-24 md:pt-14" :key="mainKey">
       <section
-         class="container mx-auto px-6 md:px-10 lg:px-0 flex flex-col items-center min-h-[90vh]"
+         class="container mx-auto px-6 md:px-10 lg:px-0 flex flex-col min-h-[90vh]"
       >
+         <h1 class="text-5xl font-bold text-left mb-10">
+            Statistiques de sommeil
+         </h1>
          <!-- Canvas chart 7 days -->
-         <div v-if="displayChartSeven" class="lg:w-4/6 mb-20">
-            <BarChart :chartData="chart7stat" :options="chart7options" />
+         <div
+            v-if="displayChartSeven"
+            class="mb-16 lg:mb-20 grid grid-cols-1 lg:grid-cols-2 gap-6 items-center"
+         >
+            <BarChart
+               :chartData="chart7stat"
+               :options="chart7options"
+               class="h-[50vh] grid place-content-center"
+            />
+            <div class="md:px-10">
+               Sur les 7derniers jours vous avez mal dormi le lundi, mardi et
+               mercredi, 7heures de sommeil ne sont pas assez.
+            </div>
          </div>
          <!-- Loading icon inbetween rest call -->
          <div v-if="displayLoading7" class="text-xl flex items-center mb-20">
@@ -378,8 +415,29 @@ export default {
          </div>
 
          <!-- Canvas CHART 30 days -->
-         <div v-if="displayChart" class="lg:w-4/6 mb-20">
-            <BarChart :chartData="chart30stat" :options="chart30options" />
+         <div
+            v-if="displayChart"
+            class="mb-16 lg:mb-20 grid grid-cols-1 lg:grid-cols-2 gap-6 items-center"
+         >
+            <BarChart
+               :chartData="chart30stat"
+               :options="chart30options"
+               class="h-[50vh] grid place-content-center"
+            />
+            <div class="md:px-10">
+               <p class="mb-10">
+                  Lorem ipsum dolor sit amet consectetur adipisicing elit. Neque
+                  dolore quidem aperiam quibusdam libero ipsam eligendi, a sunt
+                  laboriosam nam, quo laborum, id rerum quos dolorum blanditiis
+                  dolor vero corporis!
+               </p>
+               <p>
+                  Lorem ipsum dolor sit amet consectetur adipisicing elit. Neque
+                  dolore quidem aperiam quibusdam libero ipsam eligendi, a sunt
+                  laboriosam nam, quo laborum, id rerum quos dolorum blanditiis
+                  dolor vero corporis!
+               </p>
+            </div>
          </div>
          <!-- Loading icon inbetween rest call -->
          <div v-if="displayLoading30" class="text-xl flex items-center mb-20">
@@ -405,31 +463,78 @@ export default {
          <div v-if="displayEmpty30" class="mb-20">
             <p>Vous n'avez pas de données pour les 30 derniers jours</p>
          </div>
-         <FormStat>
+
+         <h2 class="text-5xl font-bold mt-20">Créer une nouvelle entrée</h2>
+
+         <button class="text-3xl font-bold uppercase" @click="openAddStatModal">
+            Click me ahaha
+         </button>
+
+         <!-- Create statistic form -->
+         <FormStat
+            class="absolute inset-0 h-screen bg-themePrimary p-10"
+            v-if="toggleAddStatModal"
+         >
             <template #field>
-               <FormField
-                  label="date"
-                  type="date"
-                  :modelValue="user_date_input"
-                  @update:modelValue="
-                     (newValue) => (user_date_input = newValue)
-                  "
-               />
-               <FormField
-                  label="heure couche"
-                  type="time"
-                  :modelValue="user_heure_couche_input"
-                  @update:modelValue="
-                  (newValue) => (user_heure_couche_input = newValue)"
-               />
-               <FormField
-                  label="heure reveil"
-                  type="time"
-                  :modelValue="user_heure_reveil_input"
-                  @update:modelValue="
-                  (newValue) => (user_heure_reveil_input = newValue)"
-               />
-               <Button text="Enregistrer" @click="addStat"></Button>
+               <svg
+                  viewBox="0 0 334 334"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="w-[25px] self-end cursor-pointer"
+                  @click="openAddStatModal"
+               >
+                  <path
+                     fill-rule="evenodd"
+                     clip-rule="evenodd"
+                     d="M206.184 166.576L324.954 47.806C335.884 36.876 335.907 19.122 324.973 8.18904C314.059 -2.72096 296.301 -2.73696 285.356 8.20857L166.576 126.979L47.806 8.20857C36.876 -2.72143 19.122 -2.74442 8.18904 8.18904C-2.72096 19.103 -2.73696 36.861 8.20857 47.806L126.979 166.576L8.20857 285.356C-2.72143 296.286 -2.74442 314.04 8.18904 324.973C19.103 335.883 36.861 335.899 47.806 324.953L166.576 206.184L285.356 324.953C296.286 335.883 314.04 335.906 324.973 324.973C335.883 314.059 335.899 296.301 324.954 285.356L206.184 166.576Z"
+                     fill="black"
+                  />
+               </svg>
+               <div
+                  class="flex flex-col md:flex-row gap-20 bg-themeSecondaryDarker p-6 rounded-xl md:w-fit mb-10 mx-auto"
+               >
+                  <FormField
+                     label="Date du coucher"
+                     type="date"
+                     :modelValue="user_date_input"
+                     @update:modelValue="
+                        (newValue) => (user_date_input = newValue)
+                     "
+                  />
+                  <FormField
+                     label="Heure de coucher"
+                     type="time"
+                     :modelValue="user_heure_couche_input"
+                     @update:modelValue="
+                        (newValue) => (user_heure_couche_input = newValue)
+                     "
+                  />
+               </div>
+               <div
+                  class="flex flex-col md:flex-row gap-20 bg-themeSecondaryDarker p-6 rounded-xl md:w-fit mb-10 mx-auto"
+               >
+                  <FormField
+                     label="Date du réveil"
+                     type="date"
+                     :modelValue="user_date_2_input"
+                     @update:modelValue="
+                        (newValue) => (user_date_2_input = newValue)
+                     "
+                  />
+                  <FormField
+                     label="Heure de réveil"
+                     type="time"
+                     :modelValue="user_heure_reveil_input"
+                     @update:modelValue="
+                        (newValue) => (user_heure_reveil_input = newValue)
+                     "
+                  />
+               </div>
+               <Button
+                  text="Enregistrer"
+                  @click="addStat"
+                  class="mx-auto w-3/6"
+               ></Button>
             </template>
          </FormStat>
       </section>
