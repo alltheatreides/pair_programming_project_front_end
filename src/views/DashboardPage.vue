@@ -5,6 +5,7 @@ import router from "../router";
 import FormStat from "../components/FormStat.vue";
 import FormField from "../components/small/FormField.vue";
 import Button from "../components/small/Button.vue";
+import TestimonyCardVue from "../components/small/TestimonyCard.vue";
 
 // Used to make the chart work
 Chart.register(...registerables);
@@ -110,8 +111,7 @@ export default {
                {
                   backgroundColor: ["#3FA7D8", "#3fa7d866"],
                   color: "#fff",
-               },
-            ],
+               },],
          },
          // Last 7 days Chart Options
          chart7options: {
@@ -160,6 +160,8 @@ export default {
             },
          },
          backendResponse: [],
+
+         allStat: [],
       };
    },
    methods: {
@@ -254,13 +256,12 @@ export default {
                      user_id: parseInt(cookie_user_info[1]),
                   }),
                }
-            );
-            // Object response with an array in it
+            );            // Object response with an array in it
             const data = await response.json();
 
-            console.log(data);
+            // console.log(data);
 
-            // If response is empty, ie there are no statistics, handle the display of the error message that there are no stat
+            // If response is empty, ie there are no statistics, handle the display of the error message that there are n
             if (data.lastSevenDaysStatistics.length <= 0) {
                this.displayLoading7 = false;
                this.displayEmpty = !this.displayEmpty;
@@ -355,6 +356,60 @@ export default {
       forceRerender() {
          this.mainKey += 1;
       },
+
+      async showAll() {
+         try {
+            const rest = "http://127.0.0.1:8000";
+            // Get cookie user id
+            let cookie_user_info = this.getCookie("user_info").split(",");
+            let user_id = cookie_user_info[1];
+
+            const response = await fetch(
+               `${rest}/api/statistics/${cookie_user_info[1]}/all`,
+               {
+                  method: "POST",
+                  headers: {
+                     "Content-Type": "application/json",
+                  },
+
+                  body: JSON.stringify({
+                     user_id: parseInt(user_id),
+                  }),
+               }
+            );
+            const data = await response.json();
+
+            this.allStat = data;
+
+            data.showAllStatistics.map((entry) => {
+               const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+               entry.date = new Date(entry.date * 1000);
+               entry.date = entry.date.toLocaleDateString('fr-FR', options);
+               // this.allStat.push(entry.stat_id)
+               // // Converting the unix date timestamp to human readable dates
+               // const date = new Date(entry.date * 1000);
+               // this.allStat.push(date.toLocaleDateString());
+               entry.heure_couche = new Date(entry.heure_couche * 1000).toTimeString();
+               entry.heure_reveil = new Date(entry.heure_reveil * 1000).toTimeString();
+               // console.log(entry.date);
+               // console.log(entry.heureCoucher);
+               // console.log(entry.heure_couche);
+            })
+            console.log(this.allStat);
+            // this.allStat = data;
+            // console.log(this.allStat.showAllStatistics[0]);
+            // console.log(typeof this.allStat[0]);
+
+            this.forceRerender();
+         } catch (error) {
+            console.log(error);
+         }
+      },
+      test(event) {
+
+         console.log(event.target);
+      }
+
    },
 
    // On component loaded (page)
@@ -368,12 +423,8 @@ export default {
 
 <template>
    <main class="pt-24 md:pt-14" :key="mainKey">
-      <section
-         class="container mx-auto px-6 md:px-10 lg:px-0 flex flex-col min-h-[90vh]"
-      >
-         <h1 class="text-5xl font-bold text-left mb-10">
-            Statistiques de sommeil
-         </h1>
+      <section class="container mx-auto px-6 md:px-10 lg:px-0 flex flex-col min-h-[90vh]">
+         <h1 class="text-5xl font-bold text-left mb-10">Statistiques de sommeil</h1>
          <!-- Canvas chart 7 days -->
          <div
             v-if="displayChartSeven"
@@ -466,15 +517,10 @@ export default {
 
          <h2 class="text-5xl font-bold mt-20">Créer une nouvelle entrée</h2>
 
-         <button class="text-3xl font-bold uppercase" @click="openAddStatModal">
-            Click me ahaha
-         </button>
+         <button class="text-3xl font-bold uppercase" @click="openAddStatModal">Click me ahaha</button>
 
          <!-- Create statistic form -->
-         <FormStat
-            class="absolute inset-0 h-screen bg-themePrimary p-10"
-            v-if="toggleAddStatModal"
-         >
+         <FormStat class="absolute inset-0 h-screen bg-themePrimary p-10" v-if="toggleAddStatModal">
             <template #field>
                <svg
                   viewBox="0 0 334 334"
@@ -530,13 +576,26 @@ export default {
                      "
                   />
                </div>
-               <Button
-                  text="Enregistrer"
-                  @click="addStat"
-                  class="mx-auto w-3/6"
-               ></Button>
+               <Button text="Enregistrer" @click="addStat" class="mx-auto w-3/6"></Button>
             </template>
          </FormStat>
       </section>
+      <section>
+         <Button text="Show" @click="showAll" class="mx-auto w-3/6"></Button>
+         <tr
+            v-for="item in this.allStat.showAllStatistics"
+            @click="test"
+            class="m-10"
+            value="item.stat_id"
+         >
+            <td class="m-10">{{ item.stat_id }}</td>
+            <td>{{ item.date }}</td>
+            <td>{{ item.heure_couche }}</td>
+            <td>{{ item.heure_reveil }}</td>
+         </tr>
+      </section>
+      <!-- <div v-for="project in projects" class="project" :class="{selected: project.selected}" @click="select(project)">
+      <p><i class="fa fa-folder"></i>{{project.name}}</p>-->
+      <!-- </div> -->
    </main>
 </template>
