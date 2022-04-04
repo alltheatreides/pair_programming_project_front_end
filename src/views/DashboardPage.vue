@@ -1,3 +1,4 @@
+p
 <script setup>
 import { BarChart } from "vue-chart-3";
 import { Chart, registerables } from "chart.js";
@@ -6,6 +7,7 @@ import FormStat from "../components/FormStat.vue";
 import FormField from "../components/small/FormField.vue";
 import Button from "../components/small/Button.vue";
 import TestimonyCardVue from "../components/small/TestimonyCard.vue";
+import { isIntegerKey } from "@vue/shared";
 
 // Used to make the chart work
 Chart.register(...registerables);
@@ -36,6 +38,11 @@ export default {
 
          // Manage Modal
          toggleAddStatModal: false,
+         modalDelete: false,
+         modalUpdate: false,
+
+         // Hacky way to store item ID to delete
+         itemToDelete: 0,
 
          // input var definition
          user_date_input: Date,
@@ -111,7 +118,8 @@ export default {
                {
                   backgroundColor: ["#3FA7D8", "#3fa7d866"],
                   color: "#fff",
-               },],
+               },
+            ],
          },
          // Last 7 days Chart Options
          chart7options: {
@@ -162,8 +170,21 @@ export default {
          backendResponse: [],
 
          allStat: [],
+
+         // Variables for UPDATE
+         updateStatId: Number,
+         updateDate: "",
+         updateDateReveil: "",
+         updateHeureCoucher: "",
+         updateHeureReveil: "",
+
+         // Test
+         testValue: "Hello World",
+         console: console,
       };
    },
+
+   // Page Methods
    methods: {
       // Method that should be used as a High Order Component/Function (or just use the vue-cookie package lol)
       getCookie(username) {
@@ -256,7 +277,7 @@ export default {
                      user_id: parseInt(cookie_user_info[1]),
                   }),
                }
-            );            // Object response with an array in it
+            ); // Object response with an array in it
             const data = await response.json();
 
             // console.log(data);
@@ -357,6 +378,7 @@ export default {
          this.mainKey += 1;
       },
 
+      // REST call to get all the user statistics for UPDATE & DELETE actions
       async showAll() {
          try {
             const rest = "http://127.0.0.1:8000";
@@ -382,34 +404,164 @@ export default {
             this.allStat = data;
 
             data.showAllStatistics.map((entry) => {
-               const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+               const options = {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+               };
+
+               const dateHeureReveil = new Date(entry.heure_reveil * 1000)
+                  .toISOString()
+                  .substring(0, 10);
+
                entry.date = new Date(entry.date * 1000);
-               entry.date = entry.date.toLocaleDateString('fr-FR', options);
-               // this.allStat.push(entry.stat_id)
-               // // Converting the unix date timestamp to human readable dates
-               // const date = new Date(entry.date * 1000);
-               // this.allStat.push(date.toLocaleDateString());
-               entry.heure_couche = new Date(entry.heure_couche * 1000).toTimeString();
-               entry.heure_reveil = new Date(entry.heure_reveil * 1000).toTimeString();
+               // Change Date format to html input format to populate existing statistics list
+               entry.date = entry.date.toISOString().substring(0, 10);
+               // Change Heure de coucher to html time input format
+               entry.heure_couche = new Date(entry.heure_couche * 1000)
+                  .toTimeString()
+                  .substring(0, 5);
+               entry.heure_reveil = new Date(entry.heure_reveil * 1000)
+                  .toTimeString()
+                  .substring(0, 5);
+
+               // data.showAllStatistics.push(dateHeureReveil);
+               entry.date_reveil = dateHeureReveil;
                // console.log(entry.date);
                // console.log(entry.heureCoucher);
                // console.log(entry.heure_couche);
-            })
+               // console.log(dateHeureReveil);
+            });
             console.log(this.allStat);
-            // this.allStat = data;
-            // console.log(this.allStat.showAllStatistics[0]);
-            // console.log(typeof this.allStat[0]);
 
             this.forceRerender();
          } catch (error) {
             console.log(error);
          }
       },
+
+      // REST call to delete a statistic
+      async deleteStat(statId) {
+         try {
+            const rest = "http://127.0.0.1:8000";
+            // Get cookie user id
+            let cookie_user_info = this.getCookie("user_info").split(",");
+            let user_id = cookie_user_info[1];
+
+            const response = await fetch(
+               `${rest}/api/statistics/${cookie_user_info[1]}/delete/${statId}`,
+               {
+                  method: "POST",
+                  headers: {
+                     "Content-Type": "application/json",
+                  },
+
+                  body: JSON.stringify({
+                     user_id: parseInt(user_id),
+                     statistic_id: parseInt(statId),
+                  }),
+               }
+            );
+            const data = await response.json();
+            console.log(data);
+         } catch (error) {
+            console.log(error);
+         }
+      },
+
+      // Testing testing
       test(event) {
+         // event.preventDefault();
+         // console.log(event.target.value);
+         // const test = event.target.parentElement.value;
+         // // event.target.value = test;
+         // console.log(event.target.parentElement);
+         // console.log(test);
+         console.log(this.testValue);
+      },
 
-         console.log(event.target);
-      }
+      // Opens confirmation modal and transfers array iterated information to an internal variable that can be called outside of the loop
+      openDeleteModal(event) {
+         // Displyaing the modal
+         this.modalDelete = true;
 
+         // Extracting from id iterated statistic
+         this.itemToDelete = event.target.parentElement.value;
+      },
+
+      // Opens confirmation update modal and transfer array iterated info to internal updates variables that can be called outside of the loop
+      openUpdateModal(event) {
+         // Displyaing the modal
+         this.modalUpdate = true;
+
+         // Transferring info
+         console.log(event.target.parentElement);
+         console.log(event.target.parentElement.children[0].children[1].value);
+         console.log(event.target.parentElement.children[1].children[1].value);
+         console.log(event.target.parentElement.children[2].children[1].value);
+         console.log(event.target.parentElement.children[3].children[1].value);
+         this.updateStatId = event.target.parentElement.value;
+         // Date heure de coucher
+         this.updateDate =
+            event.target.parentElement.children[0].children[1].value;
+         // Heure de coucher
+         this.updateHeureCoucher =
+            event.target.parentElement.children[1].children[1].value;
+         // Date heure de reveil
+         this.updateDateReveil =
+            event.target.parentElement.children[2].children[1].value;
+         // Heure de reveil
+         this.updateHeureReveil =
+            event.target.parentElement.children[3].children[1].value;
+      },
+
+      async updateStat() {
+         try {
+            const rest = "http://127.0.0.1:8000";
+            // Get cookie user id
+            let cookie_user_info = this.getCookie("user_info").split(",");
+            let user_id = cookie_user_info[1];
+
+            // Transform date & hour form input to Unix timestamp
+            // Date timestamp
+            let user_date = new Date(this.updateDate).getTime() / 1000;
+            // Hours timestamps
+            let user_heure_couche =
+               new Date(
+                  this.updateDate + "T" + this.updateHeureCoucher
+               ).getTime() / 1000;
+            let user_heure_reveil =
+               new Date(
+                  this.updateDateReveil + "T" + this.updateHeureReveil
+               ).getTime() / 1000;
+
+            console.log(user_heure_couche, user_heure_reveil);
+
+            const response = await fetch(
+               `${rest}/api/user/${cookie_user_info[1]}/create`,
+               {
+                  method: "POST",
+                  headers: {
+                     "Content-Type": "application/json",
+                  },
+
+                  body: JSON.stringify({
+                     user_id: parseInt(user_id),
+                     date: user_date,
+                     heure_couche: user_heure_couche,
+                     heure_reveil: user_heure_reveil,
+                  }),
+               }
+            );
+            const data = await response.json();
+            console.log(data);
+            this.userLatestStat30();
+            this.userLatestStat7();
+            this.forceRerender();
+         } catch (error) {
+            console.log(error);
+         }
+      },
    },
 
    // On component loaded (page)
@@ -417,14 +569,22 @@ export default {
       // REST Async call to get user statistics
       this.userLatestStat30();
       this.userLatestStat7();
+
+      // TODO:deactivate below
+      // Temporary display of all info for testing purposes
+      this.showAll();
    },
 };
 </script>
 
 <template>
    <main class="pt-24 md:pt-14" :key="mainKey">
-      <section class="container mx-auto px-6 md:px-10 lg:px-0 flex flex-col min-h-[90vh]">
-         <h1 class="text-5xl font-bold text-left mb-10">Statistiques de sommeil</h1>
+      <section
+         class="container mx-auto px-6 md:px-10 lg:px-0 flex flex-col min-h-[90vh]"
+      >
+         <h1 class="text-5xl font-bold text-left mb-10">
+            Statistiques de sommeil
+         </h1>
          <!-- Canvas chart 7 days -->
          <div
             v-if="displayChartSeven"
@@ -517,10 +677,16 @@ export default {
 
          <h2 class="text-5xl font-bold mt-20">Créer une nouvelle entrée</h2>
 
-         <button class="text-3xl font-bold uppercase" @click="openAddStatModal">Click me ahaha</button>
+         <!-- Button temporaire pour ouvrir le modal de CREATE Statistique -->
+         <button class="text-3xl font-bold uppercase" @click="openAddStatModal">
+            Click me ahaha
+         </button>
 
-         <!-- Create statistic form -->
-         <FormStat class="absolute inset-0 h-screen bg-themePrimary p-10" v-if="toggleAddStatModal">
+         <!-- Create statistic form modal-->
+         <FormStat
+            class="absolute inset-0 h-screen bg-themePrimary p-10"
+            v-if="toggleAddStatModal"
+         >
             <template #field>
                <svg
                   viewBox="0 0 334 334"
@@ -576,26 +742,138 @@ export default {
                      "
                   />
                </div>
-               <Button text="Enregistrer" @click="addStat" class="mx-auto w-3/6"></Button>
+               <Button
+                  text="Enregistrer"
+                  @click="addStat"
+                  class="mx-auto w-3/6"
+               ></Button>
             </template>
          </FormStat>
       </section>
+
+      <!-- Test d'affichage liste statistiques totales -->
       <section>
-         <Button text="Show" @click="showAll" class="mx-auto w-3/6"></Button>
-         <tr
-            v-for="item in this.allStat.showAllStatistics"
-            @click="test"
-            class="m-10"
-            value="item.stat_id"
-         >
-            <td class="m-10">{{ item.stat_id }}</td>
-            <td>{{ item.date }}</td>
-            <td>{{ item.heure_couche }}</td>
-            <td>{{ item.heure_reveil }}</td>
-         </tr>
+         <!-- <Button text="Show" @click="showAll" class="mx-auto w-3/6"></Button> -->
+         <ul>
+            <li
+               v-for="item in this.allStat.showAllStatistics"
+               class="m-10 px-30 flex gap-6 items-center"
+               :key="item.stat_id"
+               v-bind:value="item.stat_id"
+            >
+               <!-- Date Entry -->
+               <div class="flex flex-col">
+                  <label @click="test" class="mb-4 text-base lg:text-xl"
+                     >Date:</label
+                  >
+                  <!-- To do, save the changed value in an internal variable for later UPDATE async method -->
+                  <input
+                     type="date"
+                     class="text-themeSecondary h-12 md:h-14 lg:h-16 rounded-xl px-4"
+                     :value="item.date"
+                     @change="
+                        (event) => {
+                           console.log(event.target.value);
+                        }
+                     "
+                  />
+               </div>
+               <!-- Heure de coucher entry -->
+               <div class="flex flex-col">
+                  <label @click="test" class="mb-4 text-base lg:text-xl"
+                     >Heure de coucher:</label
+                  >
+                  <!-- To do, save the changed value in an internal variable for later UPDATE async method -->
+                  <input
+                     type="time"
+                     class="text-themeSecondary h-12 md:h-14 lg:h-16 rounded-xl px-4"
+                     :value="item.heure_couche"
+                     @change="
+                        (event) => {
+                           console.log(event.target.value);
+                        }
+                     "
+                     @click="
+                        () => {
+                           console.log(item.heure_couche);
+                        }
+                     "
+                  />
+               </div>
+               <!-- Date Entry 2 -->
+               <div class="flex flex-col">
+                  <label @click="test" class="mb-4 text-base lg:text-xl"
+                     >Date de réveil:</label
+                  >
+                  <input
+                     type="date"
+                     class="text-themeSecondary h-12 md:h-14 lg:h-16 rounded-xl px-4"
+                     :value="item.date_reveil"
+                     @change="
+                        (event) => {
+                           console.log(event.target.value);
+                        }
+                     "
+                  />
+               </div>
+               <!-- Heure de reveil entry -->
+               <div class="flex flex-col">
+                  <label @click="test" class="mb-4 text-base lg:text-xl"
+                     >Heure de réveil:</label
+                  >
+                  <!-- To do, save the changed value in an internal variable for later UPDATE async method -->
+                  <input
+                     type="time"
+                     class="text-themeSecondary h-12 md:h-14 lg:h-16 rounded-xl px-4"
+                     :value="item.heure_reveil"
+                     @change="
+                        (event) => {
+                           console.log(event.target.value);
+                        }
+                     "
+                     @click="
+                        () => {
+                           console.log(item.heure_reveil);
+                        }
+                     "
+                  />
+               </div>
+               <!-- Button to delete entry -->
+               <p @click="openDeleteModal" class="cursor-pointer">
+                  Supprimer la statistique
+               </p>
+               <!-- Button to update entry -->
+               <p @click="openUpdateModal" class="cursor-pointer">
+                  Mettre à jour la statistique
+               </p>
+            </li>
+            <!-- Confirmation Modal to delete an entry -->
+            <div
+               v-if="modalDelete"
+               class="delete absolute inset-0 bg-themeTertiary p-5 text-black"
+            >
+               <!-- TODO rafraichir les elements DOM au moment de la suppression des entrées et bouger ça en methode ? -->
+               <p
+                  @click="
+                     () => {
+                        deleteStat(this.itemToDelete);
+                        this.itemToDelete = 0;
+                     }
+                  "
+               >
+                  YEs I am sure
+               </p>
+               <p
+                  @click="
+                     () => {
+                        modalDelete = false;
+                     }
+                  "
+               >
+                  No cancel everything, halp
+               </p>
+            </div>
+         </ul>
       </section>
-      <!-- <div v-for="project in projects" class="project" :class="{selected: project.selected}" @click="select(project)">
-      <p><i class="fa fa-folder"></i>{{project.name}}</p>-->
-      <!-- </div> -->
    </main>
 </template>
