@@ -1,4 +1,3 @@
-p
 <script setup>
 import { BarChart } from "vue-chart-3";
 import { Chart, registerables } from "chart.js";
@@ -42,7 +41,6 @@ export default {
          modalDelete: false,
          modalUpdate: false,
          displayModal: false,
-
 
          // Hacky way to store item ID to delete
          itemToDelete: 0,
@@ -484,8 +482,7 @@ export default {
       },
 
       displayModalAll() {
-         this.displayModal = !this.displayModal
-         console.log("coucou");
+         this.displayModal = !this.displayModal;
       },
 
       // Opens confirmation modal and transfers array iterated information to an internal variable that can be called outside of the loop
@@ -503,25 +500,37 @@ export default {
          this.modalUpdate = true;
 
          // Transferring info
-         console.log(event.target.parentElement);
-         console.log(event.target.parentElement.children[0].children[1].value);
-         console.log(event.target.parentElement.children[1].children[1].value);
-         console.log(event.target.parentElement.children[2].children[1].value);
-         console.log(event.target.parentElement.children[3].children[1].value);
-         this.updateStatId = event.target.parentElement.value;
+         console.log(event.target.parentElement.parentElement.parentElement);
+         console.log(
+            event.target.parentElement.parentElement.parentElement.children[0]
+               .children[1].value
+         );
+         console.log(
+            event.target.parentElement.parentElement.parentElement.children[1]
+               .children[1].value
+         );
+         console.log(
+            event.target.parentElement.parentElement.parentElement.children[2]
+               .children[1].value
+         );
+         console.log(
+            event.target.parentElement.parentElement.parentElement.children[3]
+               .children[1].value
+         );
+         this.updateStatId =
+            event.target.parentElement.parentElement.parentElement.value;
          // Date heure de coucher
          this.updateDate =
-            event.target.parentElement.children[0].children[1].value;
+            event.target.parentElement.parentElement.parentElement.children[0].children[1].value;
          // Heure de coucher
          this.updateHeureCoucher =
-            event.target.parentElement.children[1].children[1].value;
+            event.target.parentElement.parentElement.parentElement.children[1].children[1].value;
          // Date heure de reveil
          this.updateDateReveil =
-            event.target.parentElement.children[2].children[1].value;
+            event.target.parentElement.parentElement.parentElement.children[2].children[1].value;
          // Heure de reveil
          this.updateHeureReveil =
-            event.target.parentElement.children[3].children[1].value;
-
+            event.target.parentElement.parentElement.parentElement.children[3].children[1].value;
       },
 
       async updateStat() {
@@ -559,10 +568,8 @@ export default {
                      date: user_date,
                      heure_couche: user_heure_couche,
                      heure_reveil: user_heure_reveil,
-                     statistic_id: this.updateStatId
+                     statistic_id: this.updateStatId,
                   }),
-
-
                }
             );
             const data = await response.json();
@@ -590,15 +597,25 @@ export default {
 </script>
 
 <template>
-   <main class="pt-24 md:pt-14 relative" :key="mainKey">
-      <section class="container mx-auto px-6 md:px-10 lg:px-0 flex flex-col min-h-[90vh]">
+   <main class="pt-24 md:pt-14" :key="mainKey">
+      <section
+         class="container mx-auto px-6 md:px-10 lg:px-0 flex flex-col min-h-[90vh]"
+      >
+         <!-- Title and buttons to open modals -->
          <div class="flex flex-col md:flex-row justify-between items-center">
-            <h1 class="text-4xl font-bold text-left mb-5">Statistiques de sommeil</h1>
+            <h1 class="text-4xl font-bold text-left mb-5">
+               Statistiques de sommeil
+            </h1>
+            <!-- Buttons to open modals -->
             <div class="flex justify-between my-auto items-center gap-2">
-               <Button text="Supprimer ou modifier" @click="displayModalAll"></Button>
-               <!-- text-l font-bold uppercase -->
-               <!-- Button temporaire pour ouvrir le modal de CREATE Statistique -->
-               <Button text="Créer une nouvelle entrée" @click="openAddStatModal"></Button>
+               <Button
+                  text="Ajouter une entrée"
+                  @click="openAddStatModal"
+               ></Button>
+               <Button
+                  text="Modifier ou supprimer une entrée "
+                  @click="displayModalAll"
+               ></Button>
             </div>
          </div>
          <!-- Canvas chart 7 days -->
@@ -691,15 +708,16 @@ export default {
             <p>Vous n'avez pas de données pour les 30 derniers jours</p>
          </div>
 
-         <!-- Create statistic form modal-->
+         <!-- Modal Create statistic form -->
          <FormStat
-            class="absolute inset-0 z-70 h-screen bg-themePrimary p-10"
+            class="absolute inset-x-0 w-fit mx-auto bg-[#235077] p-10 flex flex-col"
             v-if="toggleAddStatModal"
          >
             <template #field>
+               <!-- Button to close the modal -->
                <svg
                   viewBox="0 0 334 334"
-                  fill="none"
+                  fill="#FCF9FC"
                   xmlns="http://www.w3.org/2000/svg"
                   class="w-[25px] self-end cursor-pointer"
                   @click="openAddStatModal"
@@ -708,11 +726,14 @@ export default {
                      fill-rule="evenodd"
                      clip-rule="evenodd"
                      d="M206.184 166.576L324.954 47.806C335.884 36.876 335.907 19.122 324.973 8.18904C314.059 -2.72096 296.301 -2.73696 285.356 8.20857L166.576 126.979L47.806 8.20857C36.876 -2.72143 19.122 -2.74442 8.18904 8.18904C-2.72096 19.103 -2.73696 36.861 8.20857 47.806L126.979 166.576L8.20857 285.356C-2.72143 296.286 -2.74442 314.04 8.18904 324.973C19.103 335.883 36.861 335.899 47.806 324.953L166.576 206.184L285.356 324.953C296.286 335.883 314.04 335.906 324.973 324.973C335.883 314.059 335.899 296.301 324.954 285.356L206.184 166.576Z"
-                     fill="black"
+                     fill="#FCF9FC"
                   />
                </svg>
+               <!-- title -->
+               <h2 class="text-3xl mb-6">Ajouter une entrée:</h2>
+               <!-- Input for heure de coucher -->
                <div
-                  class="flex flex-col md:flex-row gap-20 bg-themeSecondaryDarker p-6 rounded-xl md:w-fit mb-10 mx-auto"
+                  class="flex flex-col md:flex-row gap-20 bg-themeSecondaryDarker p-6 rounded-xl w-fit md:w-full mb-10 mx-auto"
                >
                   <FormField
                      label="Date du coucher"
@@ -731,8 +752,9 @@ export default {
                      "
                   />
                </div>
+               <!-- Input for heure de réveil -->
                <div
-                  class="flex flex-col md:flex-row gap-20 bg-themeSecondaryDarker p-6 rounded-xl md:w-fit mb-10 mx-auto"
+                  class="flex flex-col md:flex-row gap-20 bg-themeSecondaryDarker p-6 rounded-xl w-fit md:w-full mb-10 mx-auto"
                >
                   <FormField
                      label="Date du réveil"
@@ -751,152 +773,213 @@ export default {
                      "
                   />
                </div>
-               <Button text="Enregistrer" @click="addStat" class="mx-auto w-3/6"></Button>
+               <!-- Button to trigger the async add stat call -->
+               <Button text="Enregistrer" @click="addStat" class=""></Button>
             </template>
          </FormStat>
-      </section>
 
-      <!-- Test d'affichage liste statistiques totales -->
-
-      <section
-         v-if="displayModal"
-         class="delete absolute top-20 bg-themeTertiary text-black w-screen"
-      >
-         <svg
-            viewBox="0 0 334 334"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            class="w-[25px] self-end cursor-pointer"
-            @click="displayModalAll"
+         <!-- Modal Update/Delete statistic form -->
+         <FormStat
+            class="absolute inset-x-0 w-fit mx-auto h-[80vh] bg-[#235077] p-10 flex flex-col"
+            v-if="displayModal"
          >
-            <path
-               fill-rule="evenodd"
-               clip-rule="evenodd"
-               d="M206.184 166.576L324.954 47.806C335.884 36.876 335.907 19.122 324.973 8.18904C314.059 -2.72096 296.301 -2.73696 285.356 8.20857L166.576 126.979L47.806 8.20857C36.876 -2.72143 19.122 -2.74442 8.18904 8.18904C-2.72096 19.103 -2.73696 36.861 8.20857 47.806L126.979 166.576L8.20857 285.356C-2.72143 296.286 -2.74442 314.04 8.18904 324.973C19.103 335.883 36.861 335.899 47.806 324.953L166.576 206.184L285.356 324.953C296.286 335.883 314.04 335.906 324.973 324.973C335.883 314.059 335.899 296.301 324.954 285.356L206.184 166.576Z"
-               fill="black"
-            />
-         </svg>
-         <!-- <Button text="Show" @click="showAll" class="mx-auto w-3/6"></Button> -->
-         <ul>
-            <li
-               v-for="item in this.allStat.showAllStatistics"
-               class="flex gap-6 items-center"
-               :key="item.stat_id"
-               v-bind:value="item.stat_id"
-            >
-               <!-- Date Entry -->
-               <div class="flex flex-col">
-                  <label @click="test" class="mb-4 text-base lg:text-xl">Date:</label>
-                  <!-- To do, save the changed value in an internal variable for later UPDATE async method -->
-                  <input
-                     type="date"
-                     class="text-themeSecondary h-12 md:h-14 lg:h-16 rounded-xl px-4"
-                     :value="item.date"
-                     @change="
-                        (event) => {
-                           console.log(event.target.value);
-                        }
-                     "
+            <template #field>
+               <!-- Button to close the modal -->
+               <svg
+                  viewBox="0 0 334 334"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="w-[5%] self-end cursor-pointer"
+                  @click="displayModalAll"
+               >
+                  <path
+                     fill-rule="evenodd"
+                     clip-rule="evenodd"
+                     d="M206.184 166.576L324.954 47.806C335.884 36.876 335.907 19.122 324.973 8.18904C314.059 -2.72096 296.301 -2.73696 285.356 8.20857L166.576 126.979L47.806 8.20857C36.876 -2.72143 19.122 -2.74442 8.18904 8.18904C-2.72096 19.103 -2.73696 36.861 8.20857 47.806L126.979 166.576L8.20857 285.356C-2.72143 296.286 -2.74442 314.04 8.18904 324.973C19.103 335.883 36.861 335.899 47.806 324.953L166.576 206.184L285.356 324.953C296.286 335.883 314.04 335.906 324.973 324.973C335.883 314.059 335.899 296.301 324.954 285.356L206.184 166.576Z"
+                     fill="#FCF9FC"
                   />
-               </div>
-               <!-- Heure de coucher entry -->
-               <div class="flex flex-col">
-                  <label @click="test" class="mb-4 text-base lg:text-xl">Heure de coucher:</label>
-                  <!-- To do, save the changed value in an internal variable for later UPDATE async method -->
-                  <input
-                     type="time"
-                     class="text-themeSecondary h-12 md:h-14 lg:h-16 rounded-xl px-4"
-                     :value="item.heure_couche"
-                     @change="
-                        (event) => {
-                           console.log(event.target.value);
-                        }
-                     "
-                     @click="
-                        () => {
-                           console.log(item.heure_couche);
-                        }
-                     "
-                  />
-               </div>
-               <!-- Date Entry 2 -->
-               <div class="flex flex-col">
-                  <label @click="test" class="mb-4 text-base lg:text-xl">Date de réveil:</label>
-                  <input
-                     type="date"
-                     class="text-themeSecondary h-12 md:h-14 lg:h-16 rounded-xl px-4"
-                     :value="item.date_reveil"
-                     @change="
-                        (event) => {
-                           console.log(event.target.value);
-                        }
-                     "
-                  />
-               </div>
-               <!-- Heure de reveil entry -->
-               <div class="flex flex-col">
-                  <label @click="test" class="mb-4 text-base lg:text-xl">Heure de réveil:</label>
-                  <!-- To do, save the changed value in an internal variable for later UPDATE async method -->
-                  <input
-                     type="time"
-                     class="text-themeSecondary h-12 md:h-14 lg:h-16 rounded-xl px-4"
-                     :value="item.heure_reveil"
-                     @change="
-                        (event) => {
-                           console.log(event.target.value);
-                        }
-                     "
-                     @click="
-                        () => {
-                           console.log(item.heure_reveil);
-                        }
-                     "
-                  />
-               </div>
-               <!-- Button to delete entry -->
-               <p @click="openDeleteModal" class="cursor-pointer">Supprimer la statistique</p>
-               <!-- Button to update entry -->
-               <p @click="openUpdateModal" class="cursor-pointer">Mettre à jour la statistique</p>
-            </li>
-            <!-- Confirmation Modal to delete an entry -->
-            <div v-if="modalDelete">
-               <!-- TODO rafraichir les elements DOM au moment de la suppression des entrées et bouger ça en methode ? -->
-               <p
-                  @click="
-                     () => {
-                        deleteStat(this.itemToDelete);
-                        this.itemToDelete = 0;
-                     }
-                  "
-               >YEs I am sure</p>
-               <p
-                  @click="
-                     () => {
-                        modalDelete = false;
-                     }
-                  "
-               >No cancel everything, halp</p>
-            </div>
-            <!-- //TODO rafraichir les elements DOM au moment de l'upload des entrées  -->
-            <div v-if="modalUpdate" class="delete absolute inset-0 bg-themeTertiary p-5 text-black">
-               <!-- TODO rafraichir les elements DOM au moment de la suppression des entrées et bouger ça en methode ? -->
-               <p
-                  @click="
-                     () => {
-                        updateStat();
-                  
-                     }
-                  "
-               >YEs I am sure</p>
-               <p
-                  @click="
-                     () => {
-                        modalUpdate = false;
-                     }
-                  "
-               >No cancel everything, halp</p>
-            </div>
-         </ul>
+               </svg>
+               <!-- title -->
+               <h2 class="text-3xl mb-6">Modifier ou supprimer une entrée:</h2>
+               <!-- List of statistic entries -->
+               <ul class="overflow-scroll px-4 flex flex-col gap-10">
+                  <!-- List of statistic entries with buttons to delete/update inside them -->
+                  <li
+                     v-for="item in this.allStat.showAllStatistics"
+                     class="flex gap-6 items-center border-b-2 border-themeTertiary pb-4"
+                     :key="item.stat_id"
+                     v-bind:value="item.stat_id"
+                  >
+                     <!-- Date Entry -->
+                     <div class="flex flex-col h-full">
+                        <label
+                           @click="test"
+                           class="mb-4 text-base font-semibold min-h-[50%] whitespace-nowrap"
+                           >Date:</label
+                        >
+                        <!-- To do, save the changed value in an internal variable for later UPDATE async method -->
+                        <input
+                           type="date"
+                           class="text-themeSecondary h-12 md:h-14 rounded-xl px-4"
+                           :value="item.date"
+                           @change="
+                              (event) => {
+                                 console.log(event.target.value);
+                              }
+                           "
+                        />
+                     </div>
+                     <!-- Heure de coucher entry -->
+                     <div class="flex flex-col h-full">
+                        <label
+                           @click="test"
+                           class="mb-4 text-base font-semibold min-h-[50%] whitespace-nowrap"
+                           >Heure de coucher:</label
+                        >
+                        <!-- To do, save the changed value in an internal variable for later UPDATE async method -->
+                        <input
+                           type="time"
+                           class="text-themeSecondary h-12 md:h-14 rounded-xl px-4"
+                           :value="item.heure_couche"
+                           @change="
+                              (event) => {
+                                 console.log(event.target.value);
+                              }
+                           "
+                           @click="
+                              () => {
+                                 console.log(item.heure_couche);
+                              }
+                           "
+                        />
+                     </div>
+                     <!-- Date Entry 2 -->
+                     <div class="flex flex-col h-full">
+                        <label
+                           @click="test"
+                           class="mb-4 text-base font-semibold min-h-[50%] whitespace-nowrap"
+                           >Date de réveil:</label
+                        >
+                        <input
+                           type="date"
+                           class="text-themeSecondary h-12 md:h-14 rounded-xl px-4"
+                           :value="item.date_reveil"
+                           @change="
+                              (event) => {
+                                 console.log(event.target.value);
+                              }
+                           "
+                        />
+                     </div>
+                     <!-- Heure de reveil entry -->
+                     <div class="flex flex-col h-full">
+                        <label
+                           @click="test"
+                           class="mb-4 text-base font-semibold min-h-[50%] whitespace-nowrap"
+                           >Heure de réveil:</label
+                        >
+                        <!-- To do, save the changed value in an internal variable for later UPDATE async method -->
+                        <input
+                           type="time"
+                           class="text-themeSecondary h-12 md:h-14 rounded-xl px-4"
+                           :value="item.heure_reveil"
+                           @change="
+                              (event) => {
+                                 console.log(event.target.value);
+                              }
+                           "
+                           @click="
+                              () => {
+                                 console.log(item.heure_reveil);
+                              }
+                           "
+                        />
+                     </div>
+                     <!-- Buttons to delete/update entry -->
+                     <div class="flex flex-col gap-4">
+                        <!-- Button to delete entry -->
+                        <Button
+                           @click="openDeleteModal"
+                           class="cursor-pointer"
+                           text="Supprimer la statistique"
+                        >
+                        </Button>
+                        <!-- Button to update entry -->
+                        <Button
+                           @click="openUpdateModal"
+                           class="cursor-pointer"
+                           text="Mettre à jour la statistique"
+                        >
+                        </Button>
+                     </div>
+                  </li>
+                  <!-- Sub modal to confirm delete entry -->
+                  <div
+                     v-if="modalDelete"
+                     class="fixed inset-x-0 w-fit mx-auto bg-themeSecondary p-10 rounded-2xl flex gap-6"
+                  >
+                     <!-- Paragraph to explain the irreversible act the user is about to commit themselves -->
+                     <p class="bold">
+                        Vous êtes sur le point de supprimer la statistique du
+                        {{ updateDate }} !
+                     </p>
+                     <!-- TODO rafraichir les elements DOM au moment de la suppression des entrées et bouger ça en methode ? -->
+                     <Button
+                        @click="
+                           () => {
+                              deleteStat(this.itemToDelete);
+                              this.itemToDelete = 0;
+                           }
+                        "
+                        text="Oui, supprimer l'entrée."
+                     >
+                     </Button>
+                     <Button
+                        @click="
+                           () => {
+                              modalDelete = false;
+                           }
+                        "
+                        text="Non, annuler l'opération."
+                     >
+                     </Button>
+                  </div>
+                  <!-- //TODO rafraichir les elements DOM au moment de l'upload des entrées  -->
+                  <!-- Sub modal to confirm update -->
+                  <div
+                     v-if="modalUpdate"
+                     class="fixed inset-x-0 w-fit mx-auto bg-themeSecondary p-10 rounded-2xl flex gap-6"
+                  >
+                     <!-- Paragraph to explain the irreversible act the user is about to commit themselves -->
+                     <p class="bold">
+                        Vous êtes sur le point de modifier la statistique du
+                        {{ updateDate }} !
+                     </p>
+                     <!-- //TODO rafraichir les elements DOM au moment de la suppression des entrées et bouger ça en methode ? -->
+                     <!-- Button to confirm update -->
+                     <Button
+                        @click="
+                           () => {
+                              updateStat();
+                           }
+                        "
+                        text="Oui, modifier l'entrée."
+                     >
+                     </Button>
+                     <!-- Button to cancel update -->
+                     <Button
+                        @click="
+                           () => {
+                              modalUpdate = false;
+                           }
+                        "
+                        text="Non, annuler l'opération."
+                     >
+                     </Button>
+                  </div>
+               </ul>
+            </template>
+         </FormStat>
       </section>
    </main>
 </template>

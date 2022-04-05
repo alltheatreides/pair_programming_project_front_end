@@ -14,9 +14,9 @@ defineProps({
 <template>
    <a :href="link" target="_blank">
       <button
-         class="px-6 py-3 bg-themeQuaternary rounded-xl w-fit text-white flex items-center space-x-3"
+         class="px-6 py-3 bg-themeQuaternary rounded-xl w-fit text-white flex items-center space-x-3 whitespace-nowrap"
       >
-         <span class="text-lg font-bold">{{ text }}</span>
+         <span class="pointer-events-none">{{ text }}</span>
          <slot name="svg"></slot>
       </button>
    </a>
