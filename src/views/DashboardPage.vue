@@ -8,6 +8,7 @@ import FormField from "../components/small/FormField.vue";
 import Button from "../components/small/Button.vue";
 import TestimonyCardVue from "../components/small/TestimonyCard.vue";
 import { isIntegerKey } from "@vue/shared";
+import Button1 from "../components/small/Button.vue";
 
 // Used to make the chart work
 Chart.register(...registerables);
@@ -40,6 +41,8 @@ export default {
          toggleAddStatModal: false,
          modalDelete: false,
          modalUpdate: false,
+         displayModal: false,
+
 
          // Hacky way to store item ID to delete
          itemToDelete: 0,
@@ -480,6 +483,11 @@ export default {
          console.log(this.testValue);
       },
 
+      displayModalAll() {
+         this.displayModal = !this.displayModal
+         console.log("coucou");
+      },
+
       // Opens confirmation modal and transfers array iterated information to an internal variable that can be called outside of the loop
       openDeleteModal(event) {
          // Displyaing the modal
@@ -513,6 +521,7 @@ export default {
          // Heure de reveil
          this.updateHeureReveil =
             event.target.parentElement.children[3].children[1].value;
+
       },
 
       async updateStat() {
@@ -538,7 +547,7 @@ export default {
             console.log(user_heure_couche, user_heure_reveil);
 
             const response = await fetch(
-               `${rest}/api/user/${cookie_user_info[1]}/create`,
+               `${rest}/api/statistics/${cookie_user_info[1]}/modify/${this.updateStatId}`,
                {
                   method: "POST",
                   headers: {
@@ -550,7 +559,10 @@ export default {
                      date: user_date,
                      heure_couche: user_heure_couche,
                      heure_reveil: user_heure_reveil,
+                     statistic_id: this.updateStatId
                   }),
+
+
                }
             );
             const data = await response.json();
@@ -578,13 +590,17 @@ export default {
 </script>
 
 <template>
-   <main class="pt-24 md:pt-14" :key="mainKey">
-      <section
-         class="container mx-auto px-6 md:px-10 lg:px-0 flex flex-col min-h-[90vh]"
-      >
-         <h1 class="text-5xl font-bold text-left mb-10">
-            Statistiques de sommeil
-         </h1>
+   <main class="pt-24 md:pt-14 relative" :key="mainKey">
+      <section class="container mx-auto px-6 md:px-10 lg:px-0 flex flex-col min-h-[90vh]">
+         <div class="flex flex-col md:flex-row justify-between items-center">
+            <h1 class="text-4xl font-bold text-left mb-5">Statistiques de sommeil</h1>
+            <div class="flex justify-between my-auto items-center gap-2">
+               <Button text="Supprimer ou modifier" @click="displayModalAll"></Button>
+               <!-- text-l font-bold uppercase -->
+               <!-- Button temporaire pour ouvrir le modal de CREATE Statistique -->
+               <Button text="Créer une nouvelle entrée" @click="openAddStatModal"></Button>
+            </div>
+         </div>
          <!-- Canvas chart 7 days -->
          <div
             v-if="displayChartSeven"
@@ -675,16 +691,9 @@ export default {
             <p>Vous n'avez pas de données pour les 30 derniers jours</p>
          </div>
 
-         <h2 class="text-5xl font-bold mt-20">Créer une nouvelle entrée</h2>
-
-         <!-- Button temporaire pour ouvrir le modal de CREATE Statistique -->
-         <button class="text-3xl font-bold uppercase" @click="openAddStatModal">
-            Click me ahaha
-         </button>
-
          <!-- Create statistic form modal-->
          <FormStat
-            class="absolute inset-0 h-screen bg-themePrimary p-10"
+            class="absolute inset-0 z-70 h-screen bg-themePrimary p-10"
             v-if="toggleAddStatModal"
          >
             <template #field>
@@ -742,30 +751,42 @@ export default {
                      "
                   />
                </div>
-               <Button
-                  text="Enregistrer"
-                  @click="addStat"
-                  class="mx-auto w-3/6"
-               ></Button>
+               <Button text="Enregistrer" @click="addStat" class="mx-auto w-3/6"></Button>
             </template>
          </FormStat>
       </section>
 
       <!-- Test d'affichage liste statistiques totales -->
-      <section>
+
+      <section
+         v-if="displayModal"
+         class="delete absolute top-20 bg-themeTertiary text-black w-screen"
+      >
+         <svg
+            viewBox="0 0 334 334"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            class="w-[25px] self-end cursor-pointer"
+            @click="displayModalAll"
+         >
+            <path
+               fill-rule="evenodd"
+               clip-rule="evenodd"
+               d="M206.184 166.576L324.954 47.806C335.884 36.876 335.907 19.122 324.973 8.18904C314.059 -2.72096 296.301 -2.73696 285.356 8.20857L166.576 126.979L47.806 8.20857C36.876 -2.72143 19.122 -2.74442 8.18904 8.18904C-2.72096 19.103 -2.73696 36.861 8.20857 47.806L126.979 166.576L8.20857 285.356C-2.72143 296.286 -2.74442 314.04 8.18904 324.973C19.103 335.883 36.861 335.899 47.806 324.953L166.576 206.184L285.356 324.953C296.286 335.883 314.04 335.906 324.973 324.973C335.883 314.059 335.899 296.301 324.954 285.356L206.184 166.576Z"
+               fill="black"
+            />
+         </svg>
          <!-- <Button text="Show" @click="showAll" class="mx-auto w-3/6"></Button> -->
          <ul>
             <li
                v-for="item in this.allStat.showAllStatistics"
-               class="m-10 px-30 flex gap-6 items-center"
+               class="flex gap-6 items-center"
                :key="item.stat_id"
                v-bind:value="item.stat_id"
             >
                <!-- Date Entry -->
                <div class="flex flex-col">
-                  <label @click="test" class="mb-4 text-base lg:text-xl"
-                     >Date:</label
-                  >
+                  <label @click="test" class="mb-4 text-base lg:text-xl">Date:</label>
                   <!-- To do, save the changed value in an internal variable for later UPDATE async method -->
                   <input
                      type="date"
@@ -780,9 +801,7 @@ export default {
                </div>
                <!-- Heure de coucher entry -->
                <div class="flex flex-col">
-                  <label @click="test" class="mb-4 text-base lg:text-xl"
-                     >Heure de coucher:</label
-                  >
+                  <label @click="test" class="mb-4 text-base lg:text-xl">Heure de coucher:</label>
                   <!-- To do, save the changed value in an internal variable for later UPDATE async method -->
                   <input
                      type="time"
@@ -802,9 +821,7 @@ export default {
                </div>
                <!-- Date Entry 2 -->
                <div class="flex flex-col">
-                  <label @click="test" class="mb-4 text-base lg:text-xl"
-                     >Date de réveil:</label
-                  >
+                  <label @click="test" class="mb-4 text-base lg:text-xl">Date de réveil:</label>
                   <input
                      type="date"
                      class="text-themeSecondary h-12 md:h-14 lg:h-16 rounded-xl px-4"
@@ -818,9 +835,7 @@ export default {
                </div>
                <!-- Heure de reveil entry -->
                <div class="flex flex-col">
-                  <label @click="test" class="mb-4 text-base lg:text-xl"
-                     >Heure de réveil:</label
-                  >
+                  <label @click="test" class="mb-4 text-base lg:text-xl">Heure de réveil:</label>
                   <!-- To do, save the changed value in an internal variable for later UPDATE async method -->
                   <input
                      type="time"
@@ -839,19 +854,12 @@ export default {
                   />
                </div>
                <!-- Button to delete entry -->
-               <p @click="openDeleteModal" class="cursor-pointer">
-                  Supprimer la statistique
-               </p>
+               <p @click="openDeleteModal" class="cursor-pointer">Supprimer la statistique</p>
                <!-- Button to update entry -->
-               <p @click="openUpdateModal" class="cursor-pointer">
-                  Mettre à jour la statistique
-               </p>
+               <p @click="openUpdateModal" class="cursor-pointer">Mettre à jour la statistique</p>
             </li>
             <!-- Confirmation Modal to delete an entry -->
-            <div
-               v-if="modalDelete"
-               class="delete absolute inset-0 bg-themeTertiary p-5 text-black"
-            >
+            <div v-if="modalDelete">
                <!-- TODO rafraichir les elements DOM au moment de la suppression des entrées et bouger ça en methode ? -->
                <p
                   @click="
@@ -860,18 +868,33 @@ export default {
                         this.itemToDelete = 0;
                      }
                   "
-               >
-                  YEs I am sure
-               </p>
+               >YEs I am sure</p>
                <p
                   @click="
                      () => {
                         modalDelete = false;
                      }
                   "
-               >
-                  No cancel everything, halp
-               </p>
+               >No cancel everything, halp</p>
+            </div>
+            <!-- //TODO rafraichir les elements DOM au moment de l'upload des entrées  -->
+            <div v-if="modalUpdate" class="delete absolute inset-0 bg-themeTertiary p-5 text-black">
+               <!-- TODO rafraichir les elements DOM au moment de la suppression des entrées et bouger ça en methode ? -->
+               <p
+                  @click="
+                     () => {
+                        updateStat();
+                  
+                     }
+                  "
+               >YEs I am sure</p>
+               <p
+                  @click="
+                     () => {
+                        modalUpdate = false;
+                     }
+                  "
+               >No cancel everything, halp</p>
             </div>
          </ul>
       </section>
