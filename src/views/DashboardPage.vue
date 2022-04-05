@@ -602,12 +602,16 @@ export default {
          class="container mx-auto px-6 md:px-10 lg:px-0 flex flex-col min-h-[90vh]"
       >
          <!-- Title and buttons to open modals -->
-         <div class="flex flex-col md:flex-row justify-between items-center">
+         <div
+            class="flex flex-col lg:flex-row justify-between lg:items-center mb-5 lg:mb-0"
+         >
             <h1 class="text-4xl font-bold text-left mb-5">
                Statistiques de sommeil
             </h1>
             <!-- Buttons to open modals -->
-            <div class="flex justify-between my-auto items-center gap-2">
+            <div
+               class="flex flex-col md:flex-row lg:justify-between my-auto md:items-center gap-2"
+            >
                <Button
                   text="Ajouter une entrée"
                   @click="openAddStatModal"
@@ -710,7 +714,7 @@ export default {
 
          <!-- Modal Create statistic form -->
          <FormStat
-            class="absolute inset-x-0 w-fit mx-auto bg-[#235077] p-10 flex flex-col"
+            class="absolute inset-x-0 md:mx-auto bg-[#235077] md:w-fit mx-4 px-5 py-4 md:p-10 flex flex-col"
             v-if="toggleAddStatModal"
          >
             <template #field>
@@ -733,7 +737,7 @@ export default {
                <h2 class="text-3xl mb-6">Ajouter une entrée:</h2>
                <!-- Input for heure de coucher -->
                <div
-                  class="flex flex-col md:flex-row gap-20 bg-themeSecondaryDarker p-6 rounded-xl w-fit md:w-full mb-10 mx-auto"
+                  class="flex flex-col md:flex-row gap-6 md:gap-20 bg-themeSecondaryDarker p-6 rounded-xl w-full mb-10 mx-auto"
                >
                   <FormField
                      label="Date du coucher"
@@ -754,7 +758,7 @@ export default {
                </div>
                <!-- Input for heure de réveil -->
                <div
-                  class="flex flex-col md:flex-row gap-20 bg-themeSecondaryDarker p-6 rounded-xl w-fit md:w-full mb-10 mx-auto"
+                  class="flex flex-col md:flex-row gap-6 md:gap-20 bg-themeSecondaryDarker p-6 rounded-xl w-full mb-10 mx-auto"
                >
                   <FormField
                      label="Date du réveil"
@@ -780,7 +784,7 @@ export default {
 
          <!-- Modal Update/Delete statistic form -->
          <FormStat
-            class="absolute inset-x-0 w-fit mx-auto h-[80vh] bg-[#235077] p-10 flex flex-col"
+            class="absolute inset-x-0 mx-auto h-[80vh] bg-[#235077] p-10 flex flex-col"
             v-if="displayModal"
          >
             <template #field>
@@ -789,7 +793,7 @@ export default {
                   viewBox="0 0 334 334"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
-                  class="w-[5%] self-end cursor-pointer"
+                  class="md:w-[5%] self-end cursor-pointer"
                   @click="displayModalAll"
                >
                   <path
@@ -802,11 +806,11 @@ export default {
                <!-- title -->
                <h2 class="text-3xl mb-6">Modifier ou supprimer une entrée:</h2>
                <!-- List of statistic entries -->
-               <ul class="overflow-scroll px-4 flex flex-col gap-10">
+               <ul class="overflow-y-scroll px-4 flex flex-col gap-10 w-full">
                   <!-- List of statistic entries with buttons to delete/update inside them -->
                   <li
                      v-for="item in this.allStat.showAllStatistics"
-                     class="flex gap-6 items-center border-b-2 border-themeTertiary pb-4"
+                     class="flex flex-col md:flex-row gap-6 md:items-center border-b-2 border-themeTertiary pb-4"
                      :key="item.stat_id"
                      v-bind:value="item.stat_id"
                   >
@@ -814,7 +818,7 @@ export default {
                      <div class="flex flex-col h-full">
                         <label
                            @click="test"
-                           class="mb-4 text-base font-semibold min-h-[50%] whitespace-nowrap"
+                           class="md:mb-4 text-base font-semibold min-h-[50%] whitespace-nowrap"
                            >Date:</label
                         >
                         <!-- To do, save the changed value in an internal variable for later UPDATE async method -->
@@ -833,7 +837,7 @@ export default {
                      <div class="flex flex-col h-full">
                         <label
                            @click="test"
-                           class="mb-4 text-base font-semibold min-h-[50%] whitespace-nowrap"
+                           class="md:mb-4 text-base font-semibold min-h-[50%] whitespace-nowrap"
                            >Heure de coucher:</label
                         >
                         <!-- To do, save the changed value in an internal variable for later UPDATE async method -->
@@ -857,7 +861,7 @@ export default {
                      <div class="flex flex-col h-full">
                         <label
                            @click="test"
-                           class="mb-4 text-base font-semibold min-h-[50%] whitespace-nowrap"
+                           class="md:mb-4 text-base font-semibold min-h-[50%] whitespace-nowrap"
                            >Date de réveil:</label
                         >
                         <input
@@ -875,7 +879,7 @@ export default {
                      <div class="flex flex-col h-full">
                         <label
                            @click="test"
-                           class="mb-4 text-base font-semibold min-h-[50%] whitespace-nowrap"
+                           class="md:mb-4 text-base font-semibold min-h-[50%] whitespace-nowrap"
                            >Heure de réveil:</label
                         >
                         <!-- To do, save the changed value in an internal variable for later UPDATE async method -->
@@ -916,7 +920,7 @@ export default {
                   <!-- Sub modal to confirm delete entry -->
                   <div
                      v-if="modalDelete"
-                     class="fixed inset-x-0 w-fit mx-auto bg-themeSecondary p-10 rounded-2xl flex gap-6"
+                     class="fixed inset-x-0 w-fit mx-auto bg-themeSecondary p-10 rounded-2xl flex gap-6 flex-col md:flex-row"
                   >
                      <!-- Paragraph to explain the irreversible act the user is about to commit themselves -->
                      <p class="bold">
@@ -948,7 +952,7 @@ export default {
                   <!-- Sub modal to confirm update -->
                   <div
                      v-if="modalUpdate"
-                     class="fixed inset-x-0 w-fit mx-auto bg-themeSecondary p-10 rounded-2xl flex gap-6"
+                     class="fixed inset-x-0 w-fit mx-auto bg-themeSecondary p-10 rounded-2xl flex gap-6 flex-col md:flex-row"
                   >
                      <!-- Paragraph to explain the irreversible act the user is about to commit themselves -->
                      <p class="bold">

@@ -47,7 +47,7 @@ export default {
       // Remove cookies and trigger a heaer component rerender
       disconnect() {
          // if not on the main page, redirect to the main page
-         console.log("Beam me up scotty");
+         // console.log("Beam me up scotty");
          router.push("/");
 
          // Remove the cookie

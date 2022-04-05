@@ -111,6 +111,7 @@ export default {
                   @update:modelValue="
                      (newValue) => (user_name_input = newValue)
                   "
+                  class="mb-6"
                />
                <div
                   class="mb-10 text-base lg:text-lg needtodothisforsomereason"
@@ -127,6 +128,7 @@ export default {
                   @update:modelValue="
                      (newValue) => (user_email_input = newValue)
                   "
+                  class="mb-6"
                />
                <div
                   class="mb-10 text-base lg:text-lg needtodothisforsomereason"
@@ -142,6 +144,7 @@ export default {
                   @update:modelValue="
                      (newValue) => (user_password_input = newValue)
                   "
+                  class="mb-6"
                />
                <div
                   class="mb-10 text-base lg:text-lg needtodothisforsomereason"
@@ -150,7 +153,8 @@ export default {
                   Le mot de passe est trop court! Il doit faire 6 charactères
                   minimum
                </div>
-               <Button @click="register" text="S'inscrire">
+
+               <Button @click="register" text="S'inscrire" class="m-12">
                   <template #svg>
                      <svg
                         width="30"
