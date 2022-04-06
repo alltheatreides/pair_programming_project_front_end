@@ -182,6 +182,17 @@ export default {
          // Test
          testValue: "Hello World",
          console: console,
+         commentsHeureSomeil: [],
+         test: [],
+
+         // Tableaux pour diviser les heures de sommeil en categories afin de pouvoir afficher les commentaires
+         sommeilmoins6heures: [],
+         sommeilplus6heures: [],
+         sommeilplus7heures: [],
+         sommeilPlus9heures: [],
+
+         //Tableau pour stocker les données du sommeil pour 30 jours afin de calculer la moyenne
+         heuresSommeil30Jours: [],
       };
    },
 
@@ -247,6 +258,10 @@ export default {
 
                   // Populate internal array with calculated sleep hour
                   this.sleepHours.push(hours);
+
+                  //On push les données dans un tableau pour faire des calcules et generer les commentaires à afficher
+                  this.heuresSommeil30Jours.push(hours)
+
                });
 
                // WIP changing the label array with the recently populated label array
@@ -255,6 +270,10 @@ export default {
                this.displayLoading30 = false;
                // this.displayChart = !this.displayChart;
                this.displayChart = true;
+               //On declanche la function pour afficher les commentaires
+               this.generateSleepComments30Jours();
+
+
             }
          } catch (error) {
             console.log(error);
@@ -304,16 +323,21 @@ export default {
 
                   // Populate internal array with calculated sleep hour
                   this.sleepHoursSeven.push(hours);
+                  //Inserer les données date et heures de someil dans un nouveau tableau pour pouvoir generer les commentaires
+                  this.commentsHeureSomeil.push({ date, hours });
                });
 
                // WIP changing the label array with the recently populated label array
                this.chart7stat.datasets[0].data =
                   this.sleepHoursSeven.reverse();
 
+               // Gerer l'affichage de chart 7 jours
                this.chart7stat.labels = this.dateLabelsSeven.reverse();
                this.displayLoading7 = false;
-               // this.displayChartSeven = !this.displayChartSeven;
                this.displayChartSeven = true;
+               //Declancher la function pour afficher les commentaires de la qualité du sommeil
+               this.generateSleepComments();
+               // console.log(this.test);
             }
          } catch (error) {
             console.log(error);
@@ -581,6 +605,61 @@ export default {
             console.log(error);
          }
       },
+      //Creer les commentaires
+      generateSleepComments() {
+         // console.log(this.commentsHeureSomeil[1]);
+
+         this.commentsHeureSomeil.map((entry) => {
+
+            switch (true) {
+               case (entry.hours < 6):
+                  // console.log("le" + entry.date + "Vous n'avez pas dormie beaucoup");
+                  // return "Vous n'avez pas dormie beaucoup"
+                  this.sommeilmoins6heures.push(entry.date.toLocaleDateString())
+                  break;
+
+               case (entry.hours >= 6 && entry.hours <= 7.5):
+                  // console.log("bonne");
+                  this.sommeilplus6heures.push(entry.date.toLocaleDateString())
+                  break;
+
+               case (entry.hours >= 7.5 && entry.hours <= 9):
+                  // console.log("excelente");
+                  this.sommeilplus7heures.push(entry.date.toLocaleDateString())
+                  break;
+
+               case (entry.hours > 9):
+                  // console.log("Le " + entry.date.toLocaleDateString() + "deprime");
+                  this.sommeilPlus9heures.push(entry.date.toLocaleDateString())
+                  break;
+
+            }
+
+
+         })
+
+
+      },
+      generatemoyenneSleep30Jours() {
+
+         console.log(this.heuresSommeil30Jours);
+         let sum = 0;
+
+         // Iterate the elements of the array
+         this.heuresSommeil30Jours.map((entry) => {
+            sum = (sum + entry)
+         });
+
+         // Returning the average of the numbers
+         let moyenne = (sum / this.heuresSommeil30Jours.length)
+
+         console.log(moyenne);
+         return moyenne;
+
+
+
+
+      },
    },
 
    // On component loaded (page)
@@ -598,28 +677,14 @@ export default {
 
 <template>
    <main class="pt-24 md:pt-14" :key="mainKey">
-      <section
-         class="container mx-auto px-6 md:px-10 lg:px-0 flex flex-col min-h-[90vh]"
-      >
+      <section class="container mx-auto px-6 md:px-10 lg:px-0 flex flex-col min-h-[90vh]">
          <!-- Title and buttons to open modals -->
-         <div
-            class="flex flex-col lg:flex-row justify-between lg:items-center mb-5 lg:mb-0"
-         >
-            <h1 class="text-4xl font-bold text-left mb-5">
-               Statistiques de sommeil
-            </h1>
+         <div class="flex flex-col lg:flex-row justify-between lg:items-center mb-5 lg:mb-0">
+            <h1 class="text-4xl font-bold text-left mb-5">Statistiques de sommeil</h1>
             <!-- Buttons to open modals -->
-            <div
-               class="flex flex-col md:flex-row lg:justify-between my-auto md:items-center gap-2"
-            >
-               <Button
-                  text="Ajouter une entrée"
-                  @click="openAddStatModal"
-               ></Button>
-               <Button
-                  text="Modifier ou supprimer une entrée "
-                  @click="displayModalAll"
-               ></Button>
+            <div class="flex flex-col md:flex-row lg:justify-between my-auto md:items-center gap-2">
+               <Button text="Ajouter une entrée" @click="openAddStatModal"></Button>
+               <Button text="Modifier ou supprimer une entrée " @click="displayModalAll"></Button>
             </div>
          </div>
          <!-- Canvas chart 7 days -->
@@ -632,8 +697,29 @@ export default {
                :options="chart7options"
                class="h-[50vh] grid place-content-center"
             />
+            <!-- //Affichage de comentaires de la qualite de someil  -->
             <div class="md:px-10">
-               Sur les 7derniers jours vous avez mal dormi le lundi, mardi et
+               <!-- //On affiche le tableau de plus de 9 heures s'il n'est pas vide -->
+               <div v-if="this.sommeilPlus9heures != ''">
+                  <p>Vous avez trop dormi le</p>
+                  <!-- <li v-for="item in this.sommeilPlus9heures">{{ item }}</li> -->
+                  {{ this.sommeilPlus9heures }}
+               </div>
+               <!-- //On affiche le tableau de plus de 7 heures s'il n'est pas vide -->
+               <div v-if="this.sommeilplus7heures != ''">
+                  <p>Vous avez excellement dormi le</p>
+                  {{ this.sommeilplus7heures }}
+               </div>
+               <!-- //On affiche le tableau de plus de 6 heures s'il n'est pas vide -->
+               <div v-if="this.sommeilplus6heures != ''">
+                  <p>Vous avez bien dormi le</p>
+                  {{ this.sommeilplus6heures }}
+               </div>
+               <!-- //On affiche le tableau de moins de 6 heures s'il n'est pas vide -->
+               <div v-if="this.sommeilmoins6heures != ''">
+                  <p>Vous avez mal dormi le</p>
+                  {{ this.sommeilmoins6heures }}
+               </div>Sur les 7derniers jours vous avez mal dormi le lundi, mardi et
                mercredi, 7heures de sommeil ne sont pas assez.
             </div>
          </div>
@@ -672,13 +758,8 @@ export default {
                :options="chart30options"
                class="h-[50vh] grid place-content-center"
             />
+
             <div class="md:px-10">
-               <p class="mb-10">
-                  Lorem ipsum dolor sit amet consectetur adipisicing elit. Neque
-                  dolore quidem aperiam quibusdam libero ipsam eligendi, a sunt
-                  laboriosam nam, quo laborum, id rerum quos dolorum blanditiis
-                  dolor vero corporis!
-               </p>
                <p>
                   Lorem ipsum dolor sit amet consectetur adipisicing elit. Neque
                   dolore quidem aperiam quibusdam libero ipsam eligendi, a sunt
@@ -686,6 +767,7 @@ export default {
                   dolor vero corporis!
                </p>
             </div>
+            <!-- </div> -->
          </div>
          <!-- Loading icon inbetween rest call -->
          <div v-if="displayLoading30" class="text-xl flex items-center mb-20">
@@ -778,7 +860,7 @@ export default {
                   />
                </div>
                <!-- Button to trigger the async add stat call -->
-               <Button text="Enregistrer" @click="addStat" class=""></Button>
+               <Button text="Enregistrer" @click="addStat" class></Button>
             </template>
          </FormStat>
 
@@ -819,8 +901,7 @@ export default {
                         <label
                            @click="test"
                            class="md:mb-4 text-base font-semibold min-h-[50%] whitespace-nowrap"
-                           >Date:</label
-                        >
+                        >Date:</label>
                         <!-- To do, save the changed value in an internal variable for later UPDATE async method -->
                         <input
                            type="date"
@@ -838,8 +919,10 @@ export default {
                         <label
                            @click="test"
                            class="md:mb-4 text-base font-semibold min-h-[50%] whitespace-nowrap"
-                           >Heure de coucher:</label
                         >
+                           Heure
+                           de coucher:
+                        </label>
                         <!-- To do, save the changed value in an internal variable for later UPDATE async method -->
                         <input
                            type="time"
@@ -862,8 +945,10 @@ export default {
                         <label
                            @click="test"
                            class="md:mb-4 text-base font-semibold min-h-[50%] whitespace-nowrap"
-                           >Date de réveil:</label
                         >
+                           Date
+                           de réveil:
+                        </label>
                         <input
                            type="date"
                            class="text-themeSecondary h-12 md:h-14 rounded-xl px-4"
@@ -880,8 +965,10 @@ export default {
                         <label
                            @click="test"
                            class="md:mb-4 text-base font-semibold min-h-[50%] whitespace-nowrap"
-                           >Heure de réveil:</label
                         >
+                           Heure
+                           de réveil:
+                        </label>
                         <!-- To do, save the changed value in an internal variable for later UPDATE async method -->
                         <input
                            type="time"
@@ -906,15 +993,13 @@ export default {
                            @click="openDeleteModal"
                            class="cursor-pointer"
                            text="Supprimer la statistique"
-                        >
-                        </Button>
+                        ></Button>
                         <!-- Button to update entry -->
                         <Button
                            @click="openUpdateModal"
                            class="cursor-pointer"
                            text="Mettre à jour la statistique"
-                        >
-                        </Button>
+                        ></Button>
                      </div>
                   </li>
                   <!-- Sub modal to confirm delete entry -->
@@ -936,8 +1021,7 @@ export default {
                            }
                         "
                         text="Oui, supprimer l'entrée."
-                     >
-                     </Button>
+                     ></Button>
                      <Button
                         @click="
                            () => {
@@ -945,8 +1029,7 @@ export default {
                            }
                         "
                         text="Non, annuler l'opération."
-                     >
-                     </Button>
+                     ></Button>
                   </div>
                   <!-- //TODO rafraichir les elements DOM au moment de l'upload des entrées  -->
                   <!-- Sub modal to confirm update -->
@@ -968,8 +1051,7 @@ export default {
                            }
                         "
                         text="Oui, modifier l'entrée."
-                     >
-                     </Button>
+                     ></Button>
                      <!-- Button to cancel update -->
                      <Button
                         @click="
@@ -978,8 +1060,7 @@ export default {
                            }
                         "
                         text="Non, annuler l'opération."
-                     >
-                     </Button>
+                     ></Button>
                   </div>
                </ul>
             </template>
