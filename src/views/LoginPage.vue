@@ -93,24 +93,29 @@ export default {
 
                // Gotta test somehow and it is annoying to comment and decomment atm
                console.log(data);
+               if (data["user_info"] === "") {
+                  router.push("/");
+               } else {
 
-               // Handling cookie expiration date
-               const expireDate = new Date();
-               expireDate.setTime(
-                  expireDate.getTime() + 30 * 24 * 60 * 60 * 1000
-               );
-               let expires = "expires=" + expireDate.toUTCString();
+                  // Handling cookie expiration date
+                  const expireDate = new Date();
+                  expireDate.setTime(
+                     expireDate.getTime() + 30 * 24 * 60 * 60 * 1000
+                  );
+                  let expires = "expires=" + expireDate.toUTCString();
 
-               // Create cookies from json server response
-               document.cookie = `user_info=${data["user_info"]}; ${expires}`;
+                  // Create cookies from json server response
+                  document.cookie = `user_info=${data["user_info"]}; ${expires}`;
 
-               // Route to the dashboard page: as of writing does not properly refreshed the page (ie leaves the login template on screen)
-               router.push("/dashboard");
+                  // Route to the dashboard page: as of writing does not properly refreshed the page (ie leaves the login template on screen)
+                  router.push("/dashboard");
 
-               // Trigger refresh of header
+                  // Trigger refresh of header
+               }
             } catch (error) {
                console.log(error);
             }
+
          }
       },
    },
@@ -122,11 +127,7 @@ export default {
       <section
          class="container mx-auto px-6 md:px-10 lg:px-0 flex flex-col items-center min-h-[90vh]"
       >
-         <Form
-            title="Connectez vous !"
-            buttonText="Se connecter"
-            buttonLink="#"
-         >
+         <Form title="Connectez vous !" buttonText="Se connecter" buttonLink="#">
             <template #field>
                <FormField
                   label="Email"
@@ -140,9 +141,7 @@ export default {
                <div
                   class="mb-10 text-base lg:text-lg needtodothisforsomereason"
                   v-if="displayErrorMail"
-               >
-                  Le mail donné n'est pas au bon format
-               </div>
+               >Le mail donné n'est pas au bon format</div>
                <FormField
                   label="Mot de passe"
                   type="password"
@@ -155,9 +154,7 @@ export default {
                <div
                   class="mb-10 text-base lg:text-lg needtodothisforsomereason"
                   v-if="displayErrorPassword"
-               >
-                  Le mot de passe est vide !
-               </div>
+               >Le mot de passe est vide !</div>
                <Button @click="login" text="Se connecter">
                   <template #svg>
                      <svg
@@ -184,9 +181,7 @@ export default {
          <div
             class="mt-6 bg-themeSecondaryDarker p-6 rounded-xl text-lg needtodothisforsomereason"
             v-if="restMessageReturn"
-         >
-            {{ backendResponse.message }}
-         </div>
+         >{{ backendResponse.message }}</div>
       </section>
    </main>
 </template>
