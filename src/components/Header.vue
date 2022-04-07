@@ -1,9 +1,16 @@
 <script setup>
-// functions
+// Pinia state management
+// Instance the store, counter.count is the internal variable that is used as key for the header template
+const counter = useCounterStore();
+// Watching counter state change triggered by various actions such as login/disconnect
+counter.$subscribe((mutation, state) => {
+   // console.log("it liiiives! (hi this is patrierrm the header");
+});
 </script>
 
 <script>
 import router from "../router";
+import { useCounterStore } from "../stores/counter";
 
 export default {
    data() {
@@ -38,21 +45,12 @@ export default {
 
       // Verify that user_info cookie exists, if yes change loggein status to true
       checkLoggedIn() {
-
          if (this.getCookie("user_info") !== "") {
-
             if (!this.loggedIn) {
                this.loggedIn = true;
-
             }
-
          }
-
       },
-
-      // test() {
-      //    browser.cookies.onChanged.hasListener(callback);
-      // },
 
       // Remove cookies and trigger a heaer component rerender
       disconnect() {
@@ -73,20 +71,16 @@ export default {
       // Manages the rerender with template keys
       forceRerender() {
          this.headerKey = this.headerKey + 1;
-         console.log("coucou ça marche");
       },
    },
 
    // On component mounted/change, make sure to check user logged in status to display proper navbar options
    mounted() {
       this.checkLoggedIn();
-      // this.test();
-
    },
    // On component mounted/change, make sure to check user logged in status to display proper navbar options
    updated() {
       this.checkLoggedIn();
-
    },
 };
 </script>
@@ -94,7 +88,7 @@ export default {
 <template>
    <header
       class="bg-themeQuaternary md:bg-themeQuaternaryDarker flex z-20 items-center justify-between w-full px-4 md:px-10 lg:px-0 py-4 fixed md:relative"
-      :key="headerKey"
+      :key="counter.count"
    >
       <div class="container mx-auto flex justify-between">
          <!-- Logo and Brand Name  -->
@@ -139,11 +133,22 @@ export default {
             <ul class="flex gap-6 uppercase text-2xl">
                <router-link to="/" class="font-semibold">Accueil</router-link>
                <!-- Rajouter une condition d'existence de cookie user avant d'afficher le lien ci dessous -->
-               <router-link to="/login" v-if="!loggedIn" class="font-semibold">Connexion</router-link>
+               <router-link to="/login" v-if="!loggedIn" class="font-semibold"
+                  >Connexion</router-link
+               >
                <!-- Rajouter une condition d'existence de cookie user avant d'afficher le lien ci dessous -->
-               <router-link to="/register" v-if="!loggedIn" class="font-semibold">Inscription</router-link>
-               <router-link to="/dashboard" v-if="loggedIn" class="uppercase">Dashboard</router-link>
-               <button v-if="loggedIn" @click="disconnect" class="uppercase">Déconnexion</button>
+               <router-link
+                  to="/register"
+                  v-if="!loggedIn"
+                  class="font-semibold"
+                  >Inscription</router-link
+               >
+               <router-link to="/dashboard" v-if="loggedIn" class="uppercase"
+                  >Dashboard</router-link
+               >
+               <button v-if="loggedIn" @click="disconnect" class="uppercase">
+                  Déconnexion
+               </button>
             </ul>
          </nav>
 
@@ -169,7 +174,9 @@ export default {
          class="absolute inset-y-0 right-0 h-screen z-10 bg-themeSecondary pt-6 px-6"
       >
          <nav class>
-            <ul class="flex flex-col gap-6 text-xl text-right uppercase font-bold">
+            <ul
+               class="flex flex-col gap-6 text-xl text-right uppercase font-bold"
+            >
                <svg
                   viewBox="0 0 334 334"
                   fill="none"
@@ -186,11 +193,22 @@ export default {
                </svg>
                <router-link to="/" class="font-semibold">Accueil</router-link>
                <!-- Rajouter une condition d'existence de cookie user avant d'afficher le lien ci dessous -->
-               <router-link to="/login" v-if="!loggedIn" class="font-semibold">Connexion</router-link>
+               <router-link to="/login" v-if="!loggedIn" class="font-semibold"
+                  >Connexion</router-link
+               >
                <!-- Rajouter une condition d'existence de cookie user avant d'afficher le lien ci dessous -->
-               <router-link to="/register" v-if="!loggedIn" class="font-semibold">Inscription</router-link>
-               <router-link to="/dashboard" v-if="loggedIn" class="uppercase">Dashboard</router-link>
-               <button v-if="loggedIn" @click="disconnect" class="uppercase">Déconnexion</button>
+               <router-link
+                  to="/register"
+                  v-if="!loggedIn"
+                  class="font-semibold"
+                  >Inscription</router-link
+               >
+               <router-link to="/dashboard" v-if="loggedIn" class="uppercase"
+                  >Dashboard</router-link
+               >
+               <button v-if="loggedIn" @click="disconnect" class="uppercase">
+                  Déconnexion
+               </button>
             </ul>
          </nav>
       </div>

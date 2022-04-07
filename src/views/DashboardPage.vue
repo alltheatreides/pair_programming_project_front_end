@@ -628,7 +628,7 @@ export default {
             this.userLatestStat7();
 
             // Closes modals
-            this.modalUpdate = false
+            this.modalUpdate = false;
             this.displayModal = !this.displayModal;
          } catch (error) {
             console.log(error);
@@ -727,10 +727,6 @@ export default {
       // REST Async call to get user statistics
       this.userLatestStat30();
       this.userLatestStat7();
-
-      // TODO:deactivate below
-      // Temporary display of all info for testing purposes
-      this.showAll();
    },
 };
 </script>

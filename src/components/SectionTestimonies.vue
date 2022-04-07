@@ -13,12 +13,12 @@ import TestimonyCard from "./small/TestimonyCard.vue";
             class="lg:mb-20"
             title="“Une super amélioration !”"
             description="Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolores voluptatibus soluta maxime molestiae earum perferendis quo nesciunt, at obcaecati dicta cumque nam "
-            picture="/public/pictures/mpatterson.png"
+            picture="/pictures/mpatterson.png"
          />
          <TestimonyCard
             title="“Plus besoin de whisky avant le coucher !”"
             description="Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolores voluptatibus soluta maxime molestiae earum perferendis quo nesciunt, at obcaecati dicta cumque nam "
-            picture="/public/pictures/ahaddock.png"
+            picture="/pictures/ahaddock.png"
          />
       </div>
    </section>
