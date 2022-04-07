@@ -67,6 +67,9 @@ export default {
 
          // Triggers a rerender of the header component so the navbar options are updated
          this.forceRerender();
+
+         // closes the modal
+         this.openModalMenu();
       },
       // Manages the rerender with template keys
       forceRerender() {
@@ -191,9 +194,15 @@ export default {
                      fill="currentColor"
                   />
                </svg>
-               <router-link to="/" class="font-semibold">Accueil</router-link>
+               <router-link to="/" class="font-semibold" @click="openModalMenu"
+                  >Accueil</router-link
+               >
                <!-- Rajouter une condition d'existence de cookie user avant d'afficher le lien ci dessous -->
-               <router-link to="/login" v-if="!loggedIn" class="font-semibold"
+               <router-link
+                  to="/login"
+                  v-if="!loggedIn"
+                  class="font-semibold"
+                  @click="openModalMenu"
                   >Connexion</router-link
                >
                <!-- Rajouter une condition d'existence de cookie user avant d'afficher le lien ci dessous -->
@@ -201,9 +210,14 @@ export default {
                   to="/register"
                   v-if="!loggedIn"
                   class="font-semibold"
+                  @click="openModalMenu"
                   >Inscription</router-link
                >
-               <router-link to="/dashboard" v-if="loggedIn" class="uppercase"
+               <router-link
+                  to="/dashboard"
+                  v-if="loggedIn"
+                  class="uppercase"
+                  @click="openModalMenu"
                   >Dashboard</router-link
                >
                <button v-if="loggedIn" @click="disconnect" class="uppercase">
