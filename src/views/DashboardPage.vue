@@ -182,17 +182,19 @@ export default {
          // Test
          testValue: "Hello World",
          console: console,
-         commentsHeureSomeil: [],
          test: [],
 
          // Tableaux pour diviser les heures de sommeil en categories afin de pouvoir afficher les commentaires
-         sommeilmoins6heures: [],
-         sommeilplus6heures: [],
-         sommeilplus7heures: [],
-         sommeilPlus9heures: [],
+         hoursSleptPerDate: [],
+         hoursSleptLessThan6: [],
+         hoursSleptMoreThan6: [],
+         hoursSleptMoreThan7: [],
+         hoursSleptMoreThan9: [],
 
          //Tableau pour stocker les données du sommeil pour 30 jours afin de calculer la moyenne
          heuresSommeil30Jours: [],
+         // Average sleep hours for the last 30 days
+         averageSleepHours30Days: 0,
       };
    },
 
@@ -260,8 +262,7 @@ export default {
                   this.sleepHours.push(hours);
 
                   //On push les données dans un tableau pour faire des calcules et generer les commentaires à afficher
-                  this.heuresSommeil30Jours.push(hours)
-
+                  this.heuresSommeil30Jours.push(hours);
                });
 
                // WIP changing the label array with the recently populated label array
@@ -269,11 +270,10 @@ export default {
                this.chart30stat.labels = this.dateLabels.reverse();
                this.displayLoading30 = false;
                // this.displayChart = !this.displayChart;
+               // Manage chart display
                this.displayChart = true;
-               //On declanche la function pour afficher les commentaires
-               this.generateSleepComments30Jours();
-
-
+               // Calculate average sleep hours for the last 30 days
+               this.averageSleepHours30Days = this.generateAverageSleepHours();
             }
          } catch (error) {
             console.log(error);
@@ -323,8 +323,14 @@ export default {
 
                   // Populate internal array with calculated sleep hour
                   this.sleepHoursSeven.push(hours);
+
                   //Inserer les données date et heures de someil dans un nouveau tableau pour pouvoir generer les commentaires
-                  this.commentsHeureSomeil.push({ date, hours });
+                  this.hoursSleptPerDate.push({
+                     date,
+                     hours,
+                     heureCoucher,
+                     heureReveil,
+                  });
                });
 
                // WIP changing the label array with the recently populated label array
@@ -336,8 +342,7 @@ export default {
                this.displayLoading7 = false;
                this.displayChartSeven = true;
                //Declancher la function pour afficher les commentaires de la qualité du sommeil
-               this.generateSleepComments();
-               // console.log(this.test);
+               this.generateSleepQualityArrays();
             }
          } catch (error) {
             console.log(error);
@@ -457,7 +462,7 @@ export default {
                // console.log(entry.heure_couche);
                // console.log(dateHeureReveil);
             });
-            console.log(this.allStat);
+            // console.log(this.allStat);
 
             this.forceRerender();
          } catch (error) {
@@ -494,17 +499,6 @@ export default {
          }
       },
 
-      // Testing testing
-      test(event) {
-         // event.preventDefault();
-         // console.log(event.target.value);
-         // const test = event.target.parentElement.value;
-         // // event.target.value = test;
-         // console.log(event.target.parentElement);
-         // console.log(test);
-         console.log(this.testValue);
-      },
-
       displayModalAll() {
          this.displayModal = !this.displayModal;
       },
@@ -515,7 +509,10 @@ export default {
          this.modalDelete = true;
 
          // Extracting from id iterated statistic
-         this.itemToDelete = event.target.parentElement.value;
+         this.itemToDelete =
+            event.target.parentElement.parentElement.parentElement.value;
+         console.log(event.target.parentElement.parentElement.parentElement);
+         console.log(this.itemToDelete);
       },
 
       // Opens confirmation update modal and transfer array iterated info to internal updates variables that can be called outside of the loop
@@ -557,6 +554,7 @@ export default {
             event.target.parentElement.parentElement.parentElement.children[3].children[1].value;
       },
 
+      // REST Call to update a statistic
       async updateStat() {
          try {
             const rest = "http://127.0.0.1:8000";
@@ -605,60 +603,91 @@ export default {
             console.log(error);
          }
       },
-      //Creer les commentaires
-      generateSleepComments() {
-         // console.log(this.commentsHeureSomeil[1]);
 
-         this.commentsHeureSomeil.map((entry) => {
-
+      // Method to generate arrays with date on sleep quality based on slept hours
+      generateSleepQualityArrays() {
+         // looping over the internal hoursSleptPerDate array (contains date and slept hours)
+         this.hoursSleptPerDate.map((entry) => {
+            // Depending on hours slept, populate various internal arrays
+            // variable declaration for new arrays object keys
+            let date;
+            let hours;
+            let heureCoucher;
+            let heureReveil;
             switch (true) {
-               case (entry.hours < 6):
-                  // console.log("le" + entry.date + "Vous n'avez pas dormie beaucoup");
-                  // return "Vous n'avez pas dormie beaucoup"
-                  this.sommeilmoins6heures.push(entry.date.toLocaleDateString())
+               case entry.hours < 6:
+                  date = entry.date;
+                  hours = entry.hours;
+                  heureCoucher = entry.heureCoucher;
+                  heureReveil = entry.heureReveil;
+                  this.hoursSleptLessThan6.push({
+                     date,
+                     hours,
+                     heureCoucher,
+                     heureReveil,
+                  });
                   break;
 
-               case (entry.hours >= 6 && entry.hours <= 7.5):
-                  // console.log("bonne");
-                  this.sommeilplus6heures.push(entry.date.toLocaleDateString())
+               case entry.hours >= 6 && entry.hours <= 7.5:
+                  date = entry.date;
+                  hours = entry.hours;
+                  heureCoucher = entry.heureCoucher;
+                  heureReveil = entry.heureReveil;
+
+                  this.hoursSleptMoreThan6.push({
+                     date,
+                     hours,
+                     heureCoucher,
+                     heureReveil,
+                  });
                   break;
 
-               case (entry.hours >= 7.5 && entry.hours <= 9):
-                  // console.log("excelente");
-                  this.sommeilplus7heures.push(entry.date.toLocaleDateString())
+               case entry.hours >= 7.5 && entry.hours <= 9:
+                  date = entry.date;
+                  hours = entry.hours;
+                  heureCoucher = entry.heureCoucher;
+                  heureReveil = entry.heureReveil;
+
+                  this.hoursSleptMoreThan7.push({
+                     date,
+                     hours,
+                     heureCoucher,
+                     heureReveil,
+                  });
                   break;
 
-               case (entry.hours > 9):
-                  // console.log("Le " + entry.date.toLocaleDateString() + "deprime");
-                  this.sommeilPlus9heures.push(entry.date.toLocaleDateString())
-                  break;
+               case entry.hours > 9:
+                  date = entry.date;
+                  hours = entry.hours;
+                  heureCoucher = entry.heureCoucher;
+                  heureReveil = entry.heureReveil;
 
+                  this.hoursSleptMoreThan9.push({
+                     date,
+                     hours,
+                     heureCoucher,
+                     heureReveil,
+                  });
+                  break;
             }
-
-
-         })
-
-
+         });
       },
-      generatemoyenneSleep30Jours() {
 
-         console.log(this.heuresSommeil30Jours);
+      // Method to generate average slept hours from internal heuresSommeil30Jours array
+      generateAverageSleepHours() {
+         // console.log(this.heuresSommeil30Jours);
          let sum = 0;
 
          // Iterate the elements of the array
          this.heuresSommeil30Jours.map((entry) => {
-            sum = (sum + entry)
+            sum = sum + entry;
          });
 
          // Returning the average of the numbers
-         let moyenne = (sum / this.heuresSommeil30Jours.length)
+         let moyenne = sum / this.heuresSommeil30Jours.length;
 
-         console.log(moyenne);
+         // console.log(moyenne);
          return moyenne;
-
-
-
-
       },
    },
 
@@ -677,14 +706,28 @@ export default {
 
 <template>
    <main class="pt-24 md:pt-14" :key="mainKey">
-      <section class="container mx-auto px-6 md:px-10 lg:px-0 flex flex-col min-h-[90vh]">
+      <section
+         class="container mx-auto px-6 md:px-10 lg:px-0 flex flex-col min-h-[90vh]"
+      >
          <!-- Title and buttons to open modals -->
-         <div class="flex flex-col lg:flex-row justify-between lg:items-center mb-5 lg:mb-0">
-            <h1 class="text-4xl font-bold text-left mb-5">Statistiques de sommeil</h1>
+         <div
+            class="flex flex-col lg:flex-row justify-between lg:items-center mb-5 lg:mb-0"
+         >
+            <h1 class="text-4xl font-bold text-left mb-5">
+               Statistiques de sommeil
+            </h1>
             <!-- Buttons to open modals -->
-            <div class="flex flex-col md:flex-row lg:justify-between my-auto md:items-center gap-2">
-               <Button text="Ajouter une entrée" @click="openAddStatModal"></Button>
-               <Button text="Modifier ou supprimer une entrée " @click="displayModalAll"></Button>
+            <div
+               class="flex flex-col md:flex-row lg:justify-between my-auto md:items-center gap-2"
+            >
+               <Button
+                  text="Ajouter une entrée"
+                  @click="openAddStatModal"
+               ></Button>
+               <Button
+                  text="Modifier ou supprimer une entrée "
+                  @click="displayModalAll"
+               ></Button>
             </div>
          </div>
          <!-- Canvas chart 7 days -->
@@ -699,28 +742,65 @@ export default {
             />
             <!-- //Affichage de comentaires de la qualite de someil  -->
             <div class="md:px-10">
-               <!-- //On affiche le tableau de plus de 9 heures s'il n'est pas vide -->
-               <div v-if="this.sommeilPlus9heures != ''">
-                  <p>Vous avez trop dormi le</p>
-                  <!-- <li v-for="item in this.sommeilPlus9heures">{{ item }}</li> -->
-                  {{ this.sommeilPlus9heures }}
+               <!-- Conditional rendering of message when slept hours are less than 6 -->
+               <div v-if="hoursSleptLessThan6 != ''" class="mb-4">
+                  Attention, pour la/les nuit(s)
+                  <span v-for="item in hoursSleptLessThan6" :key="item.date">
+                     du
+                     {{
+                        item.heureCoucher.toLocaleDateString("fr-FR", {
+                           weekday: "long",
+                        })
+                     }}
+                     au
+                     {{
+                        item.heureReveil.toLocaleDateString("fr-FR", {
+                           weekday: "long",
+                        })
+                     }},
+                  </span>
+                  moins de 6h de sommeil sont nuisibles à la santé.
                </div>
-               <!-- //On affiche le tableau de plus de 7 heures s'il n'est pas vide -->
-               <div v-if="this.sommeilplus7heures != ''">
-                  <p>Vous avez excellement dormi le</p>
-                  {{ this.sommeilplus7heures }}
+               <!-- Conditional rendering of message when slept hours are average  -->
+               <div v-if="hoursSleptMoreThan7 != ''" class="mb-4">
+                  Très bien ! Pour la/les nuit(s)
+                  <span v-for="item in hoursSleptMoreThan7" :key="item.date">
+                     du
+                     {{
+                        item.heureCoucher.toLocaleDateString("fr-FR", {
+                           weekday: "long",
+                        })
+                     }}
+                     au
+                     {{
+                        item.heureReveil.toLocaleDateString("fr-FR", {
+                           weekday: "long",
+                        })
+                     }},
+                  </span>
+                  votre temps de sommeil est dans la moyenne des 7h30
+                  nécessaires à une bonne qualité de sommeil.
                </div>
-               <!-- //On affiche le tableau de plus de 6 heures s'il n'est pas vide -->
-               <div v-if="this.sommeilplus6heures != ''">
-                  <p>Vous avez bien dormi le</p>
-                  {{ this.sommeilplus6heures }}
+               <!-- Conditional rendering of message when slept hours are more than 6 -->
+               <div v-if="hoursSleptMoreThan9 != ''" class="mb-4">
+                  Excellent ! Pour la/les nuit(s)
+                  <span v-for="item in hoursSleptMoreThan9" :key="item.date">
+                     du
+                     {{
+                        item.heureCoucher.toLocaleDateString("fr-FR", {
+                           weekday: "long",
+                        })
+                     }}
+                     au
+                     {{
+                        item.heureReveil.toLocaleDateString("fr-FR", {
+                           weekday: "long",
+                        })
+                     }},
+                  </span>
+                  votre temps de sommeil supérieur à 9h et idéal pour la qualité
+                  du sommeil.
                </div>
-               <!-- //On affiche le tableau de moins de 6 heures s'il n'est pas vide -->
-               <div v-if="this.sommeilmoins6heures != ''">
-                  <p>Vous avez mal dormi le</p>
-                  {{ this.sommeilmoins6heures }}
-               </div>Sur les 7derniers jours vous avez mal dormi le lundi, mardi et
-               mercredi, 7heures de sommeil ne sont pas assez.
             </div>
          </div>
          <!-- Loading icon inbetween rest call -->
@@ -758,13 +838,39 @@ export default {
                :options="chart30options"
                class="h-[50vh] grid place-content-center"
             />
-
+            <!-- Affichage des commentaires de la qualité du sommeil -->
             <div class="md:px-10">
-               <p>
-                  Lorem ipsum dolor sit amet consectetur adipisicing elit. Neque
-                  dolore quidem aperiam quibusdam libero ipsam eligendi, a sunt
-                  laboriosam nam, quo laborum, id rerum quos dolorum blanditiis
-                  dolor vero corporis!
+               <p
+                  v-if="
+                     averageSleepHours30Days > 0 && averageSleepHours30Days < 6
+                  "
+               >
+                  Attention ! Votre qualité de sommeil est en moyenne inférieur
+                  à 6 heures par nuit ce qui peut avoir des effets négatifs sur
+                  votre santé ! Essayez de dormir plus 💤 !
+               </p>
+               <p
+                  v-if="
+                     averageSleepHours30Days > 6 &&
+                     averageSleepHours30Days < 7.3
+                  "
+               >
+                  Votre qualité de sommeil est légèrement inférieur à la moyenne
+                  attention à ne pas cumuler du déficit de sommeil !
+               </p>
+               <p
+                  v-if="
+                     averageSleepHours30Days >= 7.3 &&
+                     averageSleepHours30Days < 9
+                  "
+               >
+                  Votre qualité de sommeil sur les 30 derniers jours est
+                  supérieur à la moyenne, vous avez dormi 7h30 heures ou plus
+                  par nuit et bénéficiez d'une bonne qualité de sommeil 💤!
+               </p>
+               <p v-if="averageSleepHours30Days >= 9">
+                  Bravo, vous avez en moyenne dormi plus de 9 heures par nuit et
+                  bénéficiez d'une très bonne qualité de sommeil 💤!
                </p>
             </div>
             <!-- </div> -->
@@ -855,12 +961,16 @@ export default {
                      type="time"
                      :modelValue="user_heure_reveil_input"
                      @update:modelValue="
-                        (newValue) => (user_heure_reveil_input = newValue)
+                        (newValue2) => (user_heure_reveil_input = newValue2)
                      "
                   />
                </div>
                <!-- Button to trigger the async add stat call -->
-               <Button text="Enregistrer" @click="addStat" class></Button>
+               <Button
+                  text="Enregistrer"
+                  @click="addStat"
+                  class="w-fit"
+               ></Button>
             </template>
          </FormStat>
 
@@ -901,7 +1011,8 @@ export default {
                         <label
                            @click="test"
                            class="md:mb-4 text-base font-semibold min-h-[50%] whitespace-nowrap"
-                        >Date:</label>
+                           >Date:</label
+                        >
                         <!-- To do, save the changed value in an internal variable for later UPDATE async method -->
                         <input
                            type="date"
@@ -920,8 +1031,7 @@ export default {
                            @click="test"
                            class="md:mb-4 text-base font-semibold min-h-[50%] whitespace-nowrap"
                         >
-                           Heure
-                           de coucher:
+                           Heure de coucher:
                         </label>
                         <!-- To do, save the changed value in an internal variable for later UPDATE async method -->
                         <input
@@ -946,8 +1056,7 @@ export default {
                            @click="test"
                            class="md:mb-4 text-base font-semibold min-h-[50%] whitespace-nowrap"
                         >
-                           Date
-                           de réveil:
+                           Date de réveil:
                         </label>
                         <input
                            type="date"
@@ -966,8 +1075,7 @@ export default {
                            @click="test"
                            class="md:mb-4 text-base font-semibold min-h-[50%] whitespace-nowrap"
                         >
-                           Heure
-                           de réveil:
+                           Heure de réveil:
                         </label>
                         <!-- To do, save the changed value in an internal variable for later UPDATE async method -->
                         <input
