@@ -275,7 +275,6 @@ export default {
                // Calculate average sleep hours for the last 30 days
                this.averageSleepHours30Days = this.generateAverageSleepHours();
             }
-
          } catch (error) {
             console.log(error);
          }
@@ -391,9 +390,17 @@ export default {
             );
             const data = await response.json();
             console.log(data);
+            // Updates page and chart js
+            this.forceRerender();
+            this.dateLabels = [];
+            this.sleepHours = [];
+            this.dateLabelsSeven = [];
+            this.sleepHoursSeven = [];
             this.userLatestStat30();
             this.userLatestStat7();
-            this.forceRerender();
+
+            // Closes the modal
+            this.toggleAddStatModal = false;
          } catch (error) {
             console.log(error);
          }
@@ -495,6 +502,19 @@ export default {
             );
             const data = await response.json();
             console.log(data);
+
+            // Updates the page and chart js
+            this.forceRerender();
+            this.dateLabels = [];
+            this.sleepHours = [];
+            this.dateLabelsSeven = [];
+            this.sleepHoursSeven = [];
+            this.userLatestStat30();
+            this.userLatestStat7();
+
+            // Closes the modals
+            this.modalDelete = false;
+            this.displayModal = !this.displayModal;
          } catch (error) {
             console.log(error);
          }
@@ -598,14 +618,18 @@ export default {
             const data = await response.json();
             console.log(data);
 
-            // TEST pour vour si la stat se vide
+            // Updates the page and chartjs
+            this.forceRerender();
             this.dateLabels = [];
             this.sleepHours = [];
-
-
+            this.dateLabelsSeven = [];
+            this.sleepHoursSeven = [];
             this.userLatestStat30();
             this.userLatestStat7();
-            this.forceRerender();
+
+            // Closes modals
+            this.modalUpdate = false
+            this.displayModal = !this.displayModal;
          } catch (error) {
             console.log(error);
          }
@@ -713,14 +737,28 @@ export default {
 
 <template>
    <main class="pt-24 md:pt-14" :key="mainKey">
-      <section class="container mx-auto px-6 md:px-10 lg:px-0 flex flex-col min-h-[90vh]">
+      <section
+         class="container mx-auto px-6 md:px-10 lg:px-0 flex flex-col min-h-[90vh]"
+      >
          <!-- Title and buttons to open modals -->
-         <div class="flex flex-col lg:flex-row justify-between lg:items-center mb-5 lg:mb-0">
-            <h1 class="text-4xl font-bold text-left mb-5">Statistiques de sommeil</h1>
+         <div
+            class="flex flex-col lg:flex-row justify-between lg:items-center mb-5 lg:mb-0"
+         >
+            <h1 class="text-4xl font-bold text-left mb-5">
+               Statistiques de sommeil
+            </h1>
             <!-- Buttons to open modals -->
-            <div class="flex flex-col md:flex-row lg:justify-between my-auto md:items-center gap-2">
-               <Button text="Ajouter une entrée" @click="openAddStatModal"></Button>
-               <Button text="Modifier ou supprimer une entrée " @click="displayModalAll"></Button>
+            <div
+               class="flex flex-col md:flex-row lg:justify-between my-auto md:items-center gap-2"
+            >
+               <Button
+                  text="Ajouter une entrée"
+                  @click="openAddStatModal"
+               ></Button>
+               <Button
+                  text="Modifier ou supprimer une entrée "
+                  @click="displayModalAll"
+               ></Button>
             </div>
          </div>
          <!-- Canvas chart 7 days -->
@@ -738,10 +776,7 @@ export default {
                <!-- Conditional rendering of message when slept hours are less than 6 -->
                <div v-if="hoursSleptLessThan6 != ''" class="mb-4">
                   Attention, pour la/les nuit(s)
-                  <span
-                     v-for="item in hoursSleptLessThan6"
-                     :key="item.date"
-                  >
+                  <span v-for="item in hoursSleptLessThan6" :key="item.date">
                      du
                      {{
                         item.heureCoucher.toLocaleDateString("fr-FR", {
@@ -760,10 +795,7 @@ export default {
                <!-- Conditional rendering of message when slept hours are average  -->
                <div v-if="hoursSleptMoreThan7 != ''" class="mb-4">
                   Très bien ! Pour la/les nuit(s)
-                  <span
-                     v-for="item in hoursSleptMoreThan7"
-                     :key="item.date"
-                  >
+                  <span v-for="item in hoursSleptMoreThan7" :key="item.date">
                      du
                      {{
                         item.heureCoucher.toLocaleDateString("fr-FR", {
@@ -783,10 +815,7 @@ export default {
                <!-- Conditional rendering of message when slept hours are more than 6 -->
                <div v-if="hoursSleptMoreThan9 != ''" class="mb-4">
                   Excellent ! Pour la/les nuit(s)
-                  <span
-                     v-for="item in hoursSleptMoreThan9"
-                     :key="item.date"
-                  >
+                  <span v-for="item in hoursSleptMoreThan9" :key="item.date">
                      du
                      {{
                         item.heureCoucher.toLocaleDateString("fr-FR", {
@@ -968,7 +997,11 @@ export default {
                   />
                </div>
                <!-- Button to trigger the async add stat call -->
-               <Button text="Enregistrer" @click="addStat" class="w-fit"></Button>
+               <Button
+                  text="Enregistrer"
+                  @click="addStat"
+                  class="w-fit"
+               ></Button>
             </template>
          </FormStat>
 
@@ -1009,7 +1042,8 @@ export default {
                         <label
                            @click="test"
                            class="md:mb-4 text-base font-semibold min-h-[50%] whitespace-nowrap"
-                        >Date:</label>
+                           >Date:</label
+                        >
                         <!-- To do, save the changed value in an internal variable for later UPDATE async method -->
                         <input
                            type="date"
@@ -1027,7 +1061,8 @@ export default {
                         <label
                            @click="test"
                            class="md:mb-4 text-base font-semibold min-h-[50%] whitespace-nowrap"
-                        >Heure de coucher:</label>
+                           >Heure de coucher:</label
+                        >
                         <!-- To do, save the changed value in an internal variable for later UPDATE async method -->
                         <input
                            type="time"
@@ -1050,7 +1085,8 @@ export default {
                         <label
                            @click="test"
                            class="md:mb-4 text-base font-semibold min-h-[50%] whitespace-nowrap"
-                        >Date de réveil:</label>
+                           >Date de réveil:</label
+                        >
                         <input
                            type="date"
                            class="text-themeSecondary h-12 md:h-14 rounded-xl px-4"
@@ -1067,7 +1103,8 @@ export default {
                         <label
                            @click="test"
                            class="md:mb-4 text-base font-semibold min-h-[50%] whitespace-nowrap"
-                        >Heure de réveil:</label>
+                           >Heure de réveil:</label
+                        >
                         <!-- To do, save the changed value in an internal variable for later UPDATE async method -->
                         <input
                            type="time"
