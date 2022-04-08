@@ -68,7 +68,7 @@ export default {
 
       // REST call to register user
       async register() {
-         const rest = "http://127.0.0.1:8000";
+         const rest = "https://morpheebackend.herokuapp.com";
          // Checking on field inputs
          if (this.checkRegisterFormInputs() === "true") {
             try {

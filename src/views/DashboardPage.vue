@@ -220,7 +220,7 @@ export default {
       // REST call to get user info from the last 30 days
       async userLatestStat30() {
          // TODO need to put that rest adresse as an ENV global
-         const rest = "http://127.0.0.1:8000";
+         const rest = "https://morpheebackend.herokuapp.com";
          try {
             // On recupere l'info a travers la funcion getCookie. // tableau qui contient les info de cookies cree. On peut l'utiliser comme ca:cookie_user_info [1];
             let cookie_user_info = this.getCookie("user_info").split(",");
@@ -282,7 +282,7 @@ export default {
       // REST call to get user info from the last 7 days
       async userLatestStat7() {
          // TODO need to put that rest adresse as an ENV global
-         const rest = "http://127.0.0.1:8000";
+         const rest = "https://morpheebackend.herokuapp.com";
          try {
             // On recupere l'info a travers la funcion getCookie. // tableau qui contient les info de cookies cree. On peut l'utiliser comme ca:cookie_user_info [1];
             let cookie_user_info = this.getCookie("user_info").split(",");
@@ -352,7 +352,7 @@ export default {
       // REST call to CREATE sleep statistic entry
       async addStat() {
          try {
-            const rest = "http://127.0.0.1:8000";
+            const rest = "https://morpheebackend.herokuapp.com";
             // Get cookie user id
             let cookie_user_info = this.getCookie("user_info").split(",");
             let user_id = cookie_user_info[1];
@@ -419,7 +419,7 @@ export default {
       // REST call to get all the user statistics for UPDATE & DELETE actions
       async showAll() {
          try {
-            const rest = "http://127.0.0.1:8000";
+            const rest = "https://morpheebackend.herokuapp.com";
             // Get cookie user id
             let cookie_user_info = this.getCookie("user_info").split(",");
             let user_id = cookie_user_info[1];
@@ -481,7 +481,7 @@ export default {
       // REST call to delete a statistic
       async deleteStat(statId) {
          try {
-            const rest = "http://127.0.0.1:8000";
+            const rest = "https://morpheebackend.herokuapp.com";
             // Get cookie user id
             let cookie_user_info = this.getCookie("user_info").split(",");
             let user_id = cookie_user_info[1];
@@ -578,7 +578,7 @@ export default {
       // REST Call to update a statistic
       async updateStat() {
          try {
-            const rest = "http://127.0.0.1:8000";
+            const rest = "https://morpheebackend.herokuapp.com";
             // Get cookie user id
             let cookie_user_info = this.getCookie("user_info").split(",");
             let user_id = cookie_user_info[1];
